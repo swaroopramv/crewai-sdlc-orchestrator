@@ -1,0 +1,42 @@
+{
+  "prd_id": "prd_shopping_cart",
+  "title": "Shopping Cart & Checkout",
+  "description": "Enable customers to add products to a cart, review their order, apply discount codes, and complete a secure checkout with multiple payment options.",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "Customers must be able to add, update the quantity of, and remove products from their cart.",
+      "priority": "must"
+    },
+    {
+      "id": "REQ-002",
+      "description": "The cart must persist across sessions for signed-in users.",
+      "priority": "must"
+    },
+    {
+      "id": "REQ-003",
+      "description": "Customers must be able to apply a valid discount code and see the updated total.",
+      "priority": "should"
+    },
+    {
+      "id": "REQ-004",
+      "description": "The checkout flow must support credit card, PayPal, and store-credit payment methods.",
+      "priority": "must"
+    },
+    {
+      "id": "REQ-005",
+      "description": "The system must recalculate taxes and shipping based on the delivery address.",
+      "priority": "must"
+    },
+    {
+      "id": "REQ-006",
+      "description": "An order confirmation email must be sent after a successful purchase.",
+      "priority": "should"
+    },
+    {
+      "id": "REQ-007",
+      "description": "The checkout API must prevent overselling by validating stock at payment time.",
+      "priority": "must"
+    }
+  ]
+}
