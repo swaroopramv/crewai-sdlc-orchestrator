@@ -1,6 +1,9 @@
 """Task definitions for Test Plan generation (Stage 5) and review (Stage 6)."""
 
-from crewai import Task
+try:
+    from crewai import Task
+except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
+    Task = None
 from typing import Optional
 
 

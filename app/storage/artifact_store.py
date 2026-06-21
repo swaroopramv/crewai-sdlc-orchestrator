@@ -35,7 +35,7 @@ class ArtifactStore:
         return sqlite3.connect(self._db_path)
 
     def store(self, artifact_id: str, stage_id: str, artifact_type: str, data: Any, version: int = 1) -> str:
-        payload = json.dumps(data) if not isinstance(data, str) else data
+        payload = data if isinstance(data, str) else json.dumps(data, default=str)
         with self._conn() as conn:
             conn.execute(
                 "INSERT OR REPLACE INTO artifacts VALUES (?,?,?,?,?,?)",

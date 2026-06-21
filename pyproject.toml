@@ -32,8 +32,8 @@ mypy = "^1.8.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
-addopts = "--cov=app --cov-report=term-missing"
+pythonpath = ["app"]
+addopts = "-ra -q"
 
 [tool.black]
 line-length = 100

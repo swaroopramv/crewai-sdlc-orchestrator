@@ -3,14 +3,14 @@
 import pytest
 from pathlib import Path
 
-from app.storage.artifact_store import ArtifactStore
-from app.storage.checkpoint_store import CheckpointStore
-from app.orchestration.approval_manager import ApprovalManager
-from app.orchestration.state_manager import StateManager
-from app.orchestration.retry_policy import RetryPolicy
-from app.orchestration.prd_ingester import PRDIngester
-from app.models.pipeline_state import PipelineState
-from app.models.artifacts import StageID, Ownership, ArtifactMeta
+from storage.artifact_store import ArtifactStore
+from storage.checkpoint_store import CheckpointStore
+from orchestration.approval_manager import ApprovalManager
+from orchestration.state_manager import StateManager
+from orchestration.retry_policy import RetryPolicy
+from orchestration.prd_ingester import PRDIngester
+from models.pipeline_state import PipelineState
+from models.artifacts import StageID, Ownership, ArtifactMeta
 
 
 # ------------------------------------------------------------------

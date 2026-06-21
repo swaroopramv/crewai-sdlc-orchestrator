@@ -140,9 +140,20 @@ Stages with `human_input=True` in their CrewAI task pause for human input. `Appr
 
 ```bash
 poetry run pytest
-# With coverage
-poetry run pytest --cov=app --cov-report=html
 ```
+
+Or, without Poetry / CrewAI installed (the core is import-safe), the unit and
+**end-to-end integration tests run with only lightweight deps**:
+
+```bash
+pip install pytest pydantic pydantic-settings pyyaml
+pytest
+```
+
+- **Unit tests** (`tests/unit/`) cover the models, storage, retry policy, and PRD ingester.
+- **Integration tests** (`tests/integration/`) run the *full 24-stage pipeline*
+  end-to-end with a fake crew factory (no LLM required), verifying phase
+  sequencing, artifact persistence, the triage loop, and the human-approval gates.
 
 ---
 

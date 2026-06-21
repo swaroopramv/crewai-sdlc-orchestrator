@@ -2,9 +2,9 @@
 
 import pytest
 from datetime import datetime
-from app.models.artifacts import StageID, Ownership, ScopingDecision, FS, TestPlan, ArtifactMeta
-from app.models.pipeline_state import PipelineState, StageStatus, PipelineStatus
-from app.models.approvals import ApprovalRequest, ApprovalStatus
+from models.artifacts import StageID, Ownership, ScopingDecision, FS, TestPlan, ArtifactMeta
+from models.pipeline_state import PipelineState, StageStatus, PipelineStatus
+from models.approvals import ApprovalRequest, ApprovalStatus
 
 
 class TestArtifactMeta:

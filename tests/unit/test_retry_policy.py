@@ -1,7 +1,7 @@
 """Unit tests for retry policy."""
 
 import pytest
-from app.orchestration.retry_policy import RetryPolicy
+from orchestration.retry_policy import RetryPolicy
 
 
 class FakeRetryableError(Exception):

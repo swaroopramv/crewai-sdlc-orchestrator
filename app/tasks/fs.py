@@ -1,6 +1,9 @@
 """Task definitions for FS generation (Stage 2) and FS review (Stage 4)."""
 
-from crewai import Task
+try:
+    from crewai import Task
+except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
+    Task = None
 from typing import Optional
 
 

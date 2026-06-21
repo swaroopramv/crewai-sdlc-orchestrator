@@ -4,11 +4,13 @@ Executes all 24 stages in order, handles the triage loop, checkpointing, and app
 """
 
 from __future__ import annotations
+import json
 import logging
 import uuid
-from typing import Optional
+from typing import Callable, Optional
 
 from models.pipeline_state import PipelineState, PipelineStatus
+from models.approvals import ApprovalRequest, ApprovalStatus
 from models.artifacts import StageID
 from orchestration.state_manager import StateManager
 from orchestration.crew_factory import CrewFactory
@@ -29,6 +31,19 @@ logger = logging.getLogger(__name__)
 
 
 class PipelineRunner:
+    # Stages that require a human approval gate (mirrors `human_approval` in pipeline.yaml).
+    APPROVAL_STAGES = {
+        StageID.TEST_PLAN_REVIEW,
+        StageID.FIX,
+        StageID.QA_SIGNOFF,
+    }
+    # Default approver roles per gated stage (used when requesting approval).
+    APPROVERS = {
+        StageID.TEST_PLAN_REVIEW: ["qa_lead@example.com", "pm@example.com"],
+        StageID.FIX: ["dev_lead@example.com", "qa_lead@example.com"],
+        StageID.QA_SIGNOFF: ["qa_manager@example.com", "qa_lead@example.com"],
+    }
+
     def __init__(
         self,
         crew_factory: CrewFactory,
@@ -38,6 +53,7 @@ class PipelineRunner:
         artifact_store: ArtifactStore,
         telemetry: TelemetryCallbacks,
         max_triage_loops: int = 5,
+        approval_callback: Optional[Callable[[ApprovalRequest], tuple]] = None,
     ):
         self.factory = crew_factory
         self.state_mgr = state_manager
@@ -46,6 +62,9 @@ class PipelineRunner:
         self.artifacts = artifact_store
         self.telemetry = telemetry
         self.max_triage_loops = max_triage_loops
+        # approval_callback(req) -> (decision, decided_by, comments).
+        # Defaults to auto-approve so the pipeline can run unattended (CI / demos).
+        self.approval_callback = approval_callback or self._auto_approve
 
     # ------------------------------------------------------------------
     # Public API
@@ -126,7 +145,7 @@ class PipelineRunner:
         existing_prd = self.artifacts.get(prd_id) if prd_id else None
         existing_feat = self.artifacts.get(feature_id) if feature_id else None
 
-        if existing_prd and existing_feat:
+        if existing_prd is not None and existing_feat is not None:
             logger.info("PRD and FeatureRequest already in store — skipping ingestion")
             return prd_id, feature_id
 
@@ -230,7 +249,7 @@ class PipelineRunner:
         )
 
         ctx["coverage_check_id"] = self._run_stage(
-            state, StageID.Coverage_CHECK,
+            state, StageID.COVERAGE_CHECK,
             lambda: self.factory.coverage_check_crew(
                 ts_tasks.coverage_check_task(None, ctx["scripts_id"], ctx["approved_plan_id"])
             ).kickoff()
@@ -294,7 +313,7 @@ class PipelineRunner:
             )
 
             ctx["fix_verify_id"] = self._run_stage(
-                state, StageID.FixVerify,
+                state, StageID.FIX_VERIFY,
                 lambda: self.factory.fix_verify_crew(
                     triage_tasks.fix_verify_task(None, ctx["patch_id"], ctx["execution_id"])
                 ).kickoff()
@@ -308,7 +327,7 @@ class PipelineRunner:
 
     def _run_phase5(self, state, ctx, pipeline_id) -> dict:
         ctx["kt_id"] = self._run_stage(
-            state, StageID.Support_KT,
+            state, StageID.SUPPORT_KT,
             lambda: self.factory.support_kt_crew(
                 release_tasks.support_kt_task(None, ctx.get("fix_verify_id", ""), ctx["approved_plan_id"], ctx["execution_id"])
             ).kickoff()
@@ -322,7 +341,7 @@ class PipelineRunner:
         )
 
         ctx["coverage_final_id"] = self._run_stage(
-            state, StageID.Coverage_FINAL,
+            state, StageID.COVERAGE_FINAL,
             lambda: self.factory.coverage_final_crew(
                 release_tasks.coverage_final_task(None, ctx["execution_id"], ctx["approved_plan_id"], ctx["coverage_check_id"])
             ).kickoff()
@@ -384,9 +403,14 @@ class PipelineRunner:
 
         def _exec():
             result = fn()
-            artifact_id = str(result).strip() if result else f"{stage_key}_result"
+            # Persist the stage output as a first-class artifact so downstream
+            # stages can resolve it by ID via the ArtifactStore.
+            artifact_id = self._persist_artifact(stage_key, result)
             self.state_mgr.stage_complete(state, stage_id, [artifact_id])
             self.telemetry.on_stage_complete(state.pipeline_id, stage_id)
+            # Enforce the human approval gate (if any) after the artifact exists.
+            if stage_id in self.APPROVAL_STAGES:
+                self._handle_approval(state, stage_id, artifact_id)
             return artifact_id
 
         def _on_retry(attempt, exc):
@@ -394,3 +418,61 @@ class PipelineRunner:
             self.telemetry.on_stage_retry(state.pipeline_id, stage_id, attempt, str(exc))
 
         return self.retry.execute(_exec, stage_id, on_retry=_on_retry)
+
+    # ------------------------------------------------------------------
+    # Artifact persistence
+    # ------------------------------------------------------------------
+
+    def _persist_artifact(self, stage_key: str, result) -> str:
+        """Store a stage's crew output in the ArtifactStore and return its ID."""
+        artifact_id = f"{stage_key}_{uuid.uuid4().hex[:8]}"
+        raw = str(result).strip() if result is not None else ""
+
+        # Prefer structured JSON output; fall back to wrapping raw text.
+        try:
+            data = json.loads(raw)
+            if not isinstance(data, dict):
+                data = {"value": data}
+        except (json.JSONDecodeError, ValueError):
+            data = {"raw": raw}
+
+        self.artifacts.store(artifact_id, stage_key, stage_key, data)
+        return artifact_id
+
+    # ------------------------------------------------------------------
+    # Human-in-the-loop approval gates
+    # ------------------------------------------------------------------
+
+    def _handle_approval(self, state: PipelineState, stage_id: StageID, artifact_id: str) -> None:
+        approvers = self.APPROVERS.get(stage_id, ["approver@example.com"])
+        req = self.approvals.request(
+            pipeline_id=state.pipeline_id,
+            stage_id=stage_id,
+            requester="orchestrator",
+            approvers=approvers,
+            context={"stage": stage_id.value if hasattr(stage_id, "value") else stage_id},
+            artifact_ids=[artifact_id],
+            minimum_approvals=1,
+        )
+
+        state.status = PipelineStatus.AWAITING_APPROVAL
+        self.state_mgr.save(state, f"Awaiting approval for {stage_id}")
+
+        decision, decided_by, comments = self.approval_callback(req)
+        self.approvals.decide(req.approval_id, decided_by, decision, comments)
+        status = self.approvals.get_status(req.approval_id)
+
+        if status != ApprovalStatus.APPROVED:
+            raise RuntimeError(
+                f"Approval gate for stage '{stage_id}' was not approved (status={status})."
+            )
+
+        state.status = PipelineStatus.IN_PROGRESS
+        self.state_mgr.save(state, f"Approved {stage_id} by {decided_by}")
+        logger.info("Approval gate %s passed (by %s)", stage_id, decided_by)
+
+    @staticmethod
+    def _auto_approve(req: ApprovalRequest) -> tuple:
+        """Default non-interactive approver: approves using the first listed approver."""
+        approver = req.approvers[0] if req.approvers else "approver@example.com"
+        return "approved", approver, "Auto-approved (non-interactive mode)"

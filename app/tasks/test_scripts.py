@@ -1,6 +1,9 @@
 """Task definitions for test script generation (Stage 7), review (Stage 8), and Coverage (Stage 9)."""
 
-from crewai import Task
+try:
+    from crewai import Task
+except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
+    Task = None
 from typing import Optional
 
 

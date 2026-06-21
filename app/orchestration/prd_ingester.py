@@ -98,9 +98,9 @@ class PRDIngester:
         Returns:
             (prd_id, feature_id) unchanged if both present.
         """
-        if not self._store.get(prd_id):
+        if self._store.get(prd_id) is None:
             raise KeyError(f"PRD artifact '{prd_id}' not found in artifact store")
-        if not self._store.get(feature_id):
+        if self._store.get(feature_id) is None:
             raise KeyError(f"FeatureRequest artifact '{feature_id}' not found in artifact store")
         logger.info("PRD ingester: existing artifacts verified — prd=%s feature=%s", prd_id, feature_id)
         return prd_id, feature_id

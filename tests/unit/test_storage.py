@@ -4,9 +4,9 @@ import pytest
 import tempfile
 import os
 
-from app.storage.artifact_store import ArtifactStore
-from app.storage.checkpoint_store import CheckpointStore
-from app.models.pipeline_state import PipelineState, PipelineStatus
+from storage.artifact_store import ArtifactStore
+from storage.checkpoint_store import CheckpointStore
+from models.pipeline_state import PipelineState, PipelineStatus
 
 
 @pytest.fixture

@@ -1,6 +1,9 @@
 """Task definitions for the Triage Loop: Triage (12), Bug File (13), Bug Repro (14), Fix (15), FixVerify (16)."""
 
-from crewai import Task
+try:
+    from crewai import Task
+except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
+    Task = None
 from typing import Optional
 
 

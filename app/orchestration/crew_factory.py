@@ -4,28 +4,35 @@ Builds the correct crew + task list for each stage based on platform config and 
 """
 
 from __future__ import annotations
-from crewai import Crew, Process
 from typing import Any
 import yaml
 from pathlib import Path
 
-from agents.dev_agent import (
-    build_dev_scoping_agent, build_fs_generator_agent, build_dev_feature_track_agent
-)
-from agents.qa_agent import (
-    build_qa_scoping_agent, build_fs_reviewer_agent, build_test_plan_generator_agent,
-    build_test_plan_reviewer_agent, build_test_script_generator_agent,
-    build_test_script_reviewer_agent, build_coverage_analyst_agent,
-)
-from agents.automation_agent import (
-    build_stage_agent, build_execute_agent, build_triage_agent, build_bug_file_agent,
-    build_bug_repro_agent, build_fix_agent, build_fix_verify_agent,
-)
-from agents.release_agent import (
-    build_support_kt_agent, build_docs_agent, build_coverage_final_agent, build_sit_agent,
-    build_nightly_integration_agent, build_nightly_reporting_agent,
-    build_qa_signoff_agent, build_feedback_agent,
-)
+# CrewAI and the agent builders are imported lazily so that the orchestration
+# package can be imported (and integration-tested with fake crews) without the
+# full CrewAI/LLM stack installed. They are only needed when a real crew is built.
+try:
+    from crewai import Crew, Process
+
+    from agents.dev_agent import (
+        build_dev_scoping_agent, build_fs_generator_agent, build_dev_feature_track_agent
+    )
+    from agents.qa_agent import (
+        build_qa_scoping_agent, build_fs_reviewer_agent, build_test_plan_generator_agent,
+        build_test_plan_reviewer_agent, build_test_script_generator_agent,
+        build_test_script_reviewer_agent, build_coverage_analyst_agent,
+    )
+    from agents.automation_agent import (
+        build_stage_agent, build_execute_agent, build_triage_agent, build_bug_file_agent,
+        build_bug_repro_agent, build_fix_agent, build_fix_verify_agent,
+    )
+    from agents.release_agent import (
+        build_support_kt_agent, build_docs_agent, build_coverage_final_agent, build_sit_agent,
+        build_nightly_integration_agent, build_nightly_reporting_agent,
+        build_qa_signoff_agent, build_feedback_agent,
+    )
+except ImportError:  # CrewAI not installed — real crew construction is unavailable.
+    Crew = Process = None
 
 CONFIG_DIR = Path(__file__).parent.parent / "config"
 

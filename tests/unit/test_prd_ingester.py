@@ -4,8 +4,8 @@ import json
 import pytest
 from pathlib import Path
 
-from app.storage.artifact_store import ArtifactStore
-from app.orchestration.prd_ingester import PRDIngester
+from storage.artifact_store import ArtifactStore
+from orchestration.prd_ingester import PRDIngester
 
 
 @pytest.fixture
