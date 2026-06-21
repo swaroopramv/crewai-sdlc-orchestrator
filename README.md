@@ -1,14 +1,144 @@
-# CrewAI SDLC Orchestrator
+# 🤖 CrewAI SDLC Orchestrator
 
-End-to-End Agentic Test SDLC Lifecycle Orchestrator built on [CrewAI](https://docs.crewai.com).
+**An end-to-end, multi-agent AI system that automates the software delivery
+lifecycle — from a product requirements doc (PRD) all the way to QA sign-off.**
 
-Orchestrates **24 stages** across **5 phases** — from feature scoping to QA sign-off — using specialized AI agents with full artifact traceability, checkpoint-based resume, and human-in-the-loop approvals.
+Built on [CrewAI](https://docs.crewai.com), it coordinates **25 specialized AI
+agents** across **24 stages** and **5 phases**, with full artifact traceability,
+checkpoint-based resume, automatic retries, a self-correcting triage loop, and
+human-in-the-loop approval gates.
 
-Runs **100% locally** by default using [Ollama](https://ollama.com) + **Mistral** (no API keys, no cloud), with optional OpenAI/Anthropic providers.
+> Runs **100% locally** by default with [Ollama](https://ollama.com) + **Mistral**
+> — no API keys, no cloud cost. OpenAI / Anthropic are optional drop-ins.
 
 ---
 
-## Project Structure
+## 📑 Table of Contents
+- [The Problem](#-the-problem)
+- [The Solution](#-the-solution)
+- [Key Features](#-key-features)
+- [How It Works](#-how-it-works-orchestration)
+- [End-to-End Flow](#-end-to-end-flow)
+- [The 5 Phases & 24 Stages](#-pipeline-phases)
+- [The 25 AI Agents](#-the-25-ai-agents)
+- [Project Structure](#-project-structure)
+- [Setup](#-setup)
+- [Running Tests](#-running-tests)
+
+---
+
+## 🔴 The Problem
+
+In most product companies, the software testing & release lifecycle is **slow,
+manual, and fragmented**:
+
+- **Hand-offs everywhere** — requirements → dev → test design → test scripting →
+  execution → bug triage → fixes → release. Each hand-off loses context and adds delay.
+- **Repetitive, low-leverage work** — engineers spend days writing functional
+  specs, test plans, and test scripts by hand for every feature.
+- **Slow bug loops** — triaging failures, filing bugs, reproducing, fixing, and
+  re-verifying is a manual back-and-forth that can take weeks.
+- **No traceability** — it's hard to prove a requirement was tested, or to resume
+  a half-finished release if something breaks.
+- **Inconsistent quality** — outcomes depend on who did the work, not a repeatable process.
+
+## 🟢 The Solution
+
+This project models the **entire lifecycle as a pipeline of AI agents**. You give
+it a PRD; it drives every downstream stage automatically — generating specs, test
+plans, and scripts, executing them, triaging failures, filing & fixing bugs,
+verifying fixes, and producing release artifacts — **pausing only where a human
+must approve**.
+
+- A **PRD goes in**, a fully tested, signed-off, documented release **comes out**.
+- Every stage's output is a **typed, stored artifact** referenced by ID — full traceability.
+- The pipeline can **resume from any checkpoint**, **retry** transient failures, and
+  **loop** on bugs until tests pass.
+- **Humans stay in control** at the gates that matter (test-plan approval, fixes, final sign-off).
+
+---
+
+## ✨ Key Features
+
+- **25 specialized agents** organized into Dev, QA, Automation, and Release teams.
+- **24-stage pipeline** across 5 phases, defined declaratively in YAML.
+- **Self-correcting triage loop** — execute → triage → file bug → reproduce → fix → verify, repeated until clean.
+- **Human-in-the-loop approval gates** with a full audit trail.
+- **Artifact store** (SQLite, swappable to Postgres/S3) — every output is persisted and traceable.
+- **Checkpoint & resume** — restart a pipeline exactly where it stopped.
+- **Configurable retries** with exponential backoff for transient errors.
+- **Local-first LLM** via Ollama + Mistral; provider-agnostic by design.
+- **Telemetry** for stage/pipeline metrics and lifecycle events.
+
+---
+
+## 🧩 How It Works (Orchestration)
+
+The orchestration is built from a few clean, decoupled pieces:
+
+| Component | Responsibility |
+|-----------|----------------|
+| **`PipelineRunner`** | Drives all 24 stages in order, runs the triage loop, enforces approval gates. |
+| **`CrewFactory`** | Builds a single-agent CrewAI *crew* per stage (one focused agent + its task + tools). |
+| **`ArtifactStore`** | Persists every stage output as a typed artifact, referenced downstream by ID. |
+| **`StateManager` + `CheckpointStore`** | Save `PipelineState` after each stage so runs can resume. |
+| **`ApprovalManager`** | Opens human-approval gates and records decisions (with timeout & audit trail). |
+| **`RetryPolicy`** | Retries transient failures with exponential backoff. |
+| **`Telemetry`** | Emits lifecycle events and aggregates metrics. |
+
+**Orchestration style:** each stage is an independent CrewAI crew running a single
+expert agent (a *sequential* process). Stages are chained by the `PipelineRunner`,
+which passes artifact IDs forward — never in-memory objects — so the flow is
+durable, resumable, and auditable. Agents and stages are configured in
+`agents.yaml`, `pipeline.yaml`, and `platforms.yaml`, so you can change behavior
+without touching code.
+
+---
+
+## 🔄 End-to-End Flow
+
+```mermaid
+flowchart TD
+    PRD([📄 PRD Document]) --> P0[Stage 0: PRD Ingestion]
+
+    subgraph P1 [Phase 1 · Scope & Development]
+        S1a[1a DEV Scoping] --> S1b[1b QA Scoping] --> S2[2 FS Generation] --> S3[3 Dev Feature Track]
+    end
+
+    subgraph P2 [Phase 2 · Review & Plan]
+        S4[4 FS Review] --> S5[5 Test Plan Gen] --> S6{{6 Test Plan Review}}
+    end
+
+    subgraph P3 [Phase 3 · Automate & Review]
+        S7[7 Test Script Gen] --> S8[8 Test Script Review] --> S9[9 Coverage Check]
+    end
+
+    subgraph P4 [Phase 4 · Execute & Triage Loop]
+        S10[10 Stage to CI] --> S11[11 Execute]
+        S11 --> S12[12 Triage]
+        S12 -->|product bugs?| BUGS{Bugs found?}
+        BUGS -->|yes| S13[13 File Bug] --> S14[14 Reproduce] --> S15{{15 Fix}} --> S16[16 Verify Fix] --> S11
+        BUGS -->|no / clean| OUT4[exit loop]
+    end
+
+    subgraph P5 [Phase 5 · Release]
+        S17[17 Support KT] --> S18[18 Docs] --> S19[19 Coverage Final] --> S20[20 SIT]
+        S20 --> S21[21 Nightly Integration] --> S22[22 Nightly Reporting] --> S23{{23 QA Sign-off}} --> S24[24 Feedback]
+    end
+
+    P0 --> P1 --> P2 --> P3 --> P4 --> P5 --> DONE([✅ Released & Signed-off])
+
+    classDef gate fill:#ffe9b3,stroke:#d9a300,color:#000;
+    class S6,S15,S23 gate;
+```
+
+> 🟡 Diamond/hexagon nodes (**6 Test Plan Review**, **15 Fix**, **23 QA Sign-off**)
+> are **human approval gates**. Phase 4 is a **loop** that keeps fixing bugs until
+> tests pass (bounded by `MAX_TRIAGE_LOOPS`).
+
+---
+
+## 📂 Project Structure
 
 ```
 crewai-sdlc-orchestrator/
@@ -62,21 +192,69 @@ crewai-sdlc-orchestrator/
 
 ---
 
-## Pipeline Phases
+## 🧭 Pipeline Phases
 
 | Phase | Stages | Ownership |
 |-------|--------|-----------|
 | 1 — Scope & Development | 1a DEV Scope → 1b QA Scope → 2 FS Gen → 3 Dev Track | DEV + QA |
 | 2 — Review & Plan | 4 FS Review → 5 TP Gen → 6 TP Review ✅ | QA + Co-owned |
 | 3 — Automate & Review | 7 TS Gen → 8 TS Review → 9 Coverage Check | QA |
-| 4 — Execute & Triage Loop | 10 Stage → 11 Execute → 12 Triage → 13 Bug File → 14 Bug Repro → 15 Fix ✅ → 16 FixVerify | QA + Co-owned |
+| 4 — Execute & Triage Loop | 10 Stage → 11 Execute → 12 Triage → 13 Bug File → 14 Bug Repro → 15 Fix ✅ → 16 Verify Fix | QA + Co-owned |
 | 5 — Release | 17 Support KT → 18 Docs → 19 Coverage Final → 20 SIT → 21 Nightly → 22 Reporting → 23 QA Sign-off ✅ → 24 Feedback | QA |
 
 ✅ = Human approval gate
 
 ---
 
-## Setup
+## 👥 The 25 AI Agents
+
+Each agent is a focused expert with its own role, goal, and tools — configured in
+[`app/config/agents.yaml`](app/config/agents.yaml).
+
+### 🛠️ Dev team (3)
+| Agent | Role |
+|-------|------|
+| `dev_scoping` | Development Engineering Scoping Expert |
+| `fs_generator` | Software Functional Specification Author |
+| `dev_feature_track` | Development Feature Track Engineer |
+
+### 🧪 QA / Test-design team (7)
+| Agent | Role |
+|-------|------|
+| `qa_scoping` | Test Design Scoping Expert |
+| `fs_reviewer` | FS Review Specialist |
+| `test_plan_generator` | Test Plan Generation Expert |
+| `test_plan_reviewer` | Test Plan Review Coordinator |
+| `test_script_generator` | Automated Test Script Engineer |
+| `test_script_reviewer` | Test Script Code Reviewer |
+| `coverage_analyst` | Test Coverage Analyst |
+
+### 🔁 Automation / Triage-loop team (7)
+| Agent | Role |
+|-------|------|
+| `stage_agent` | Test Staging Engineer |
+| `execute_agent` | Test Execution Engine |
+| `triage_agent` | Test Failure Triage Specialist |
+| `bug_file_agent` | Bug Filing Engineer |
+| `bug_repro_agent` | Bug Reproduction Specialist |
+| `fix_agent` | Bug Fix Engineer |
+| `fix_verify_agent` | Fix Validation Engineer |
+
+### 🚀 Release team (8)
+| Agent | Role |
+|-------|------|
+| `support_kt_agent` | Support Knowledge Transfer Author |
+| `docs_agent` | Feature Documentation Engineer |
+| `coverage_final_agent` | Final Coverage Report Analyst |
+| `sit_agent` | System Integration Test Engineer |
+| `nightly_integration_agent` | Nightly Integration Engineer |
+| `nightly_reporting_agent` | Nightly Report Analyst |
+| `qa_signoff_agent` | QA Sign-off Coordinator |
+| `feedback_agent` | SDLC Feedback Collector |
+
+---
+
+## 🚀 Setup
 
 ### 1. Install the local LLM (Ollama + Mistral)
 
@@ -136,7 +314,7 @@ Stages with `human_input=True` in their CrewAI task pause for human input. `Appr
 
 ---
 
-## Running Tests
+## 🧪 Running Tests
 
 ```bash
 poetry run pytest
