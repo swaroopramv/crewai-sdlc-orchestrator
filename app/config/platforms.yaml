@@ -1,0 +1,108 @@
+platforms:
+  CORE:
+    description: "Core OS platform"
+    available_stages:
+      - scoping_dev
+      - scoping_qa
+      - fs_review
+      - test_plan_gen
+      - test_plan_review
+      - test_script_gen
+      - test_script_review
+      - coverage_check
+      - stage
+      - execute
+      - triage
+      - bug_file
+      - bug_repro
+      - fix_verify
+      - support_kt
+      - coverage_final
+      - nightly_integration
+      - nightly_reporting
+      - qa_signoff
+      - feedback
+    agent_tools:
+      fs_review: spec-reviewer
+      test_plan_gen: fs-to-testplan
+      test_plan_review: testplan-reviewer
+      test_script_gen: testplan-to-script
+      stage: env-simulator
+      triage: triage-analyzer
+      bug_file: issue-writer
+      fix_verify: issue-writer
+      support_kt: doc-generator
+      coverage_final: coverage-analyzer
+      nightly_integration: env-simulator
+
+  CLOUD:
+    description: "Cloud OS platform"
+    available_stages:
+      - scoping_dev
+      - scoping_qa
+      - fs_gen
+      - dev_feature_track
+      - fs_review
+      - test_plan_gen
+      - test_plan_review
+      - test_script_gen
+      - test_script_review
+      - coverage_check
+      - stage
+      - execute
+      - triage
+      - bug_file
+      - bug_repro
+      - fix
+      - fix_verify
+      - support_kt
+      - coverage_final
+      - nightly_integration
+      - nightly_reporting
+      - qa_signoff
+      - feedback
+    agent_tools:
+      fs_gen: spec-driven-agent
+      dev_feature_track: spec-driven-agent
+      fs_review: spec-reviewer
+      test_plan_gen: fs-to-testplan
+      test_plan_review: testplan-reviewer
+      test_script_gen: testplan-to-script
+      coverage_check: coverage-analyzer
+      execute: ci-runner
+      triage: test-triage
+      bug_file: issue-writer
+      fix: triage-to-ticket
+      fix_verify: issue-writer
+      support_kt: doc-generator
+      coverage_final: coverage-analyzer
+      nightly_integration: profile-builder
+      nightly_reporting: report-generator
+
+  EDGE:
+    description: "Edge OS platform"
+    available_stages:
+      - scoping_dev
+      - scoping_qa
+      - fs_review
+      - test_plan_gen
+      - test_plan_review
+      - test_script_gen
+      - test_script_review
+      - coverage_check
+      - execute
+      - triage
+      - bug_repro
+      - fix_verify
+      - nightly_reporting
+      - qa_signoff
+      - feedback
+    agent_tools:
+      fs_review: spec-reviewer
+      test_plan_gen: fs-to-testplan
+      test_plan_review: testplan-reviewer
+      test_script_gen: testplan-to-script
+      execute: ci-runner
+      bug_repro: bug-reproducer
+      fix_verify: issue-writer
+      nightly_reporting: report-generator

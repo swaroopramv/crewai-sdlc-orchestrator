@@ -1,0 +1,267 @@
+pipeline:
+  name: "SDLC Lifecycle Orchestrator"
+  version: "1.0.0"
+
+  retry:
+    max_retries: 3
+    retry_delay_seconds: 60
+    backoff_multiplier: 2.0
+    retryable_errors:
+      - "LLMRateLimitError"
+      - "ToolExecutionError"
+      - "NetworkError"
+
+  checkpointing:
+    enabled: true
+    interval: "after_each_stage"
+    keep_last_n: 5
+    storage_backend: "database"
+
+  approval_gates:
+    default_timeout_hours: 24
+    escalation_timeout_hours: 48
+    stages_requiring_approval:
+      - stage_id: test_plan_review
+        approvers_role: ["QA Lead", "PM", "DEV Lead"]
+        minimum_approvals: 2
+      - stage_id: fix
+        approvers_role: ["DEV Lead", "QA Lead"]
+        minimum_approvals: 1
+      - stage_id: qa_signoff
+        approvers_role: ["QA Manager", "QA Lead"]
+        minimum_approvals: 2
+
+  notifications:
+    channels:
+      - type: chat
+        enabled: true
+      - type: email
+        enabled: true
+    events:
+      - stage_completed
+      - stage_failed
+      - approval_required
+      - pipeline_completed
+      - pipeline_failed
+
+  triage_loop:
+    max_loop_iterations: 5
+    exit_criteria:
+      all_tests_pass: true
+      max_open_bugs: 0
+    loop_stages:
+      - execute
+      - triage
+      - bug_file
+      - bug_repro
+      - fix
+      - fix_verify
+
+  phases:
+    phase0:
+      name: "PRD Ingestion"
+      stages:
+        - id: prd_ingestion
+          name: "PRD & Feature Request Ingestion"
+          mandatory: true
+          ownership: ORCHESTRATOR
+          inputs: [prd_file_or_text, feature_title]
+          outputs: [prd, feature_request]
+          description: >
+            Stage 0 — not AI-agentic. Reads the PRD document from file (.md/.txt/.json)
+            or structured text, parses requirements, and stores PRD + FeatureRequest
+            artifacts so all downstream stages can reference them by artifact_id.
+
+    phase1:
+      name: "Scope & Development"
+      stages:
+        - id: scoping_dev
+          name: "AI Scoping Generation (DEV)"
+          mandatory: true
+          ownership: DEV
+          inputs: [prd, feature_request]
+          outputs: [scoping_decision, feature_short_name, technology_classification]
+
+        - id: scoping_qa
+          name: "AI Scoping Generation (QA)"
+          mandatory: true
+          ownership: QA
+          inputs: [scoping_decision, prd]
+          outputs: [test_considerations, testability_assessment, coverage_scope]
+
+        - id: fs_gen
+          name: "AI FS Generation"
+          mandatory: true
+          ownership: DEV
+          inputs: [prd, scoping_decision, feature_short_name]
+          outputs: [fs, traceability_matrix]
+
+        - id: dev_feature_track
+          name: "AI Dev Feature Track"
+          mandatory: true
+          ownership: DEV
+          inputs: [prd, feature_metadata, fs]
+          outputs: [impl_plan, impl_summary, testing_notes, automation_notes]
+
+    phase2:
+      name: "Review & Plan"
+      stages:
+        - id: fs_review
+          name: "AI FS Review"
+          mandatory: true
+          ownership: QA
+          inputs: [fs, prd, traceability_matrix]
+          outputs: [fs_review_report, test_readiness_gaps, review_comments]
+
+        - id: test_plan_gen
+          name: "AI Test Plan Generation"
+          mandatory: true
+          ownership: QA
+          inputs: [fs, topology, prd, traceability_matrix, impl_summary, testing_notes]
+          outputs: [test_plan, coverage_report]
+
+        - id: test_plan_review
+          name: "Test Plan Review"
+          mandatory: true
+          ownership: CO_OWNED
+          human_approval: true
+          inputs: [test_plan, fs, coverage_report]
+          outputs: [approved_test_plan, review_comments]
+
+    phase3:
+      name: "Automate & Review"
+      stages:
+        - id: test_script_gen
+          name: "AI Test Script Generation"
+          mandatory: true
+          ownership: QA
+          inputs: [approved_test_plan, topology, impl_summary, testing_notes, automation_notes]
+          outputs: [test_scripts, libraries, testdata, project_structure]
+
+        - id: test_script_review
+          name: "AI Test Script Review"
+          mandatory: true
+          ownership: QA
+          inputs: [test_scripts, approved_test_plan]
+          outputs: [script_review_report, review_comments]
+
+        - id: coverage_check
+          name: "AI Test Script Coverage (Coverage)"
+          mandatory: true
+          ownership: QA
+          inputs: [test_scripts, approved_test_plan, coverage_report]
+          outputs: [coverage_result, coverage_gaps]
+
+    phase4:
+      name: "Execute & Triage Loop"
+      is_loop: true
+      stages:
+        - id: stage
+          name: "AI Stage [Commit to CI]"
+          mandatory: true
+          ownership: QA
+          inputs: [test_project, testbed]
+          outputs: [stage_result, ci_commit_ref]
+
+        - id: execute
+          name: "AI Execute"
+          mandatory: true
+          ownership: QA
+          inputs: [staged_test_project, testbed]
+          outputs: [execution_result, pass_fail_summary, logs]
+
+        - id: triage
+          name: "AI Triage"
+          mandatory: true
+          ownership: QA
+          inputs: [execution_result, test_scripts, logs]
+          outputs: [triage_report, failure_classification]
+
+        - id: bug_file
+          name: "AI Bug File"
+          mandatory: false
+          ownership: QA
+          inputs: [triage_report, failure_classification]
+          outputs: [bug_record]
+
+        - id: bug_repro
+          name: "AI Bug Reproduction"
+          mandatory: false
+          ownership: QA
+          inputs: [bug_record, test_scripts, testbed]
+          outputs: [reproduction_result, reproduction_steps]
+
+        - id: fix
+          name: "AI Fix"
+          mandatory: false
+          ownership: CO_OWNED
+          human_approval: true
+          inputs: [bug_record, test_scripts, triage_report, reproduction_result]
+          outputs: [fix_patch, updated_test_scripts]
+
+        - id: fix_verify
+          name: "AI FixVerify"
+          mandatory: false
+          ownership: QA
+          inputs: [fix_patch, execution_result, traceability_matrix]
+          outputs: [fix_verify_result, validation_report]
+
+    phase5:
+      name: "Release"
+      stages:
+        - id: support_kt
+          name: "AI Support KT Generation"
+          mandatory: true
+          ownership: QA
+          inputs: [fix_verify_result, approved_test_plan, execution_result]
+          outputs: [support_kt_document]
+
+        - id: docs_gen
+          name: "AI Docs"
+          mandatory: true
+          ownership: QA
+          inputs: [fs, approved_test_plan, test_scripts, execution_result]
+          outputs: [feature_documentation, release_notes]
+
+        - id: coverage_final
+          name: "AI Coverage (Final)"
+          mandatory: true
+          ownership: QA
+          inputs: [execution_result, coverage_report, approved_test_plan]
+          outputs: [final_coverage_report, coverage_delta]
+
+        - id: sit
+          name: "AI SIT"
+          mandatory: true
+          ownership: QA
+          inputs: [test_project, execution_result, fix_verify_result]
+          outputs: [sit_result, integration_report]
+
+        - id: nightly_integration
+          name: "AI Integration to Nightly"
+          mandatory: true
+          ownership: QA
+          inputs: [test_project, sit_result, execution_result]
+          outputs: [nightly_profile, regression_suite_update]
+
+        - id: nightly_reporting
+          name: "AI Nightly Reporting"
+          mandatory: true
+          ownership: QA
+          inputs: [nightly_profile, execution_result]
+          outputs: [nightly_report, trend_analysis]
+
+        - id: qa_signoff
+          name: "QA Sign-off"
+          mandatory: true
+          ownership: QA
+          human_approval: true
+          inputs: [support_kt_document, feature_documentation, final_coverage_report, sit_result, nightly_report]
+          outputs: [qa_artifacts, fcs_artifacts]
+
+        - id: feedback
+          name: "Feedback"
+          mandatory: true
+          ownership: ORCHESTRATOR
+          inputs: []
+          outputs: [feedback_report]

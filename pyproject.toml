@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "crewai-sdlc-orchestrator"
+version = "0.1.0"
+description = "A CrewAI-based, end-to-end SDLC lifecycle orchestrator with multi-agent AI for any product team. Runs locally with Ollama."
+authors = ["Open Source Contributors"]
+readme = "README.md"
+license = "MIT"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+crewai = ">=0.28.0"
+crewai-tools = ">=0.1.0"
+pydantic = "^2.6.0"
+pydantic-settings = "^2.2.0"
+langchain-ollama = ">=0.1.0"
+langchain-openai = ">=0.0.8"
+langchain-anthropic = ">=0.1.0"
+python-dotenv = "^1.0.0"
+pyyaml = "^6.0.1"
+openai = "^1.12.0"
+anthropic = "^0.23.0"
+sqlalchemy = "^2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+pytest-cov = "^4.1.0"
+black = "^24.0.0"
+ruff = "^0.3.0"
+mypy = "^1.8.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=app --cov-report=term-missing"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
