@@ -1,11 +1,13 @@
 """Pydantic models for all SDLC artifacts."""
 
 from __future__ import annotations
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+
+import uuid
 from datetime import datetime
 from enum import Enum
-import uuid
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class StageID(str, Enum):

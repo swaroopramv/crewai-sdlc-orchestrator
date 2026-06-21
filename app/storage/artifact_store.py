@@ -1,11 +1,11 @@
 """Artifact storage — persists and retrieves all SDLC artifacts."""
 
 from __future__ import annotations
+
 import json
 import sqlite3
 from datetime import datetime
-from pathlib import Path
-from typing import Optional, Any
+from typing import Any, Optional
 
 
 class ArtifactStore:

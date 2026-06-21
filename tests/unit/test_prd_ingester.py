@@ -1,11 +1,10 @@
 """Unit tests for PRD ingester (Stage 0)."""
 
 import json
-import pytest
-from pathlib import Path
 
-from storage.artifact_store import ArtifactStore
+import pytest
 from orchestration.prd_ingester import PRDIngester
+from storage.artifact_store import ArtifactStore
 
 
 @pytest.fixture

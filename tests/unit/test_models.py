@@ -1,10 +1,8 @@
 """Unit tests for artifact and state models."""
 
-import pytest
-from datetime import datetime
-from models.artifacts import StageID, Ownership, ScopingDecision, FS, TestPlan, ArtifactMeta
-from models.pipeline_state import PipelineState, StageStatus, PipelineStatus
 from models.approvals import ApprovalRequest, ApprovalStatus
+from models.artifacts import ArtifactMeta, Ownership, ScopingDecision, StageID
+from models.pipeline_state import PipelineState, PipelineStatus, StageStatus
 
 
 class TestArtifactMeta:

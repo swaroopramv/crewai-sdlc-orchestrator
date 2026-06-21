@@ -4,28 +4,29 @@ Executes all 24 stages in order, handles the triage loop, checkpointing, and app
 """
 
 from __future__ import annotations
+
 import json
 import logging
 import uuid
 from typing import Callable, Optional
 
-from models.pipeline_state import PipelineState, PipelineStatus
-from models.approvals import ApprovalRequest, ApprovalStatus
-from models.artifacts import StageID
-from orchestration.state_manager import StateManager
-from orchestration.crew_factory import CrewFactory
-from orchestration.retry_policy import RetryPolicy
-from orchestration.approval_manager import ApprovalManager
-from telemetry.callbacks import TelemetryCallbacks
-from storage.artifact_store import ArtifactStore
-from orchestration.prd_ingester import PRDIngester
-import tasks.scoping as scoping_tasks
+import tasks.execution as exec_tasks
 import tasks.fs as fs_tasks
+import tasks.release as release_tasks
+import tasks.scoping as scoping_tasks
 import tasks.test_plan as tp_tasks
 import tasks.test_scripts as ts_tasks
-import tasks.execution as exec_tasks
 import tasks.triage as triage_tasks
-import tasks.release as release_tasks
+from models.approvals import ApprovalRequest, ApprovalStatus
+from models.artifacts import StageID
+from models.pipeline_state import PipelineState, PipelineStatus
+from orchestration.approval_manager import ApprovalManager
+from orchestration.crew_factory import CrewFactory
+from orchestration.prd_ingester import PRDIngester
+from orchestration.retry_policy import RetryPolicy
+from orchestration.state_manager import StateManager
+from storage.artifact_store import ArtifactStore
+from telemetry.callbacks import TelemetryCallbacks
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """Checkpoint store — saves and loads PipelineState for resume capability."""
 
 from __future__ import annotations
-import json
+
 import sqlite3
 from datetime import datetime
 from typing import Optional

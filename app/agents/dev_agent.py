@@ -3,8 +3,9 @@ Development Engineering (DEV) agents.
 Covers: DEV Scoping (1a), FS Generation (2), Dev Feature Track (3).
 """
 
-from crewai import Agent
 from typing import Any
+
+from crewai import Agent
 
 
 def build_dev_scoping_agent(llm: Any, tools: list) -> Agent:

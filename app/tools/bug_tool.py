@@ -1,7 +1,8 @@
 """IssueTracker bug tracking tool for filing, updating, and querying bug records."""
 
-from crewai.tools import BaseTool
 import json
+
+from crewai.tools import BaseTool
 
 
 class IssueFileTool(BaseTool):

@@ -1,8 +1,10 @@
 """Metrics aggregation from telemetry events."""
 
 from __future__ import annotations
+
 from collections import defaultdict
-from models.telemetry import TelemetryEvent, EventType, PipelineMetrics, StageMetrics
+
+from models.telemetry import EventType, PipelineMetrics, StageMetrics, TelemetryEvent
 
 
 class MetricsCollector:

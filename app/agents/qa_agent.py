@@ -4,8 +4,9 @@ Covers: QA Scoping (1b), FS Review (4), Test Plan Gen (5), Test Plan Review (6),
         Test Script Gen (7), Test Script Review (8), Coverage Check (9).
 """
 
-from crewai import Agent
 from typing import Any
+
+from crewai import Agent
 
 
 def build_qa_scoping_agent(llm: Any, tools: list) -> Agent:

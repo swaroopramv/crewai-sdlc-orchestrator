@@ -1,12 +1,10 @@
 """Unit tests for artifact store and checkpoint store."""
 
-import pytest
-import tempfile
-import os
 
+import pytest
+from models.pipeline_state import PipelineState
 from storage.artifact_store import ArtifactStore
 from storage.checkpoint_store import CheckpointStore
-from models.pipeline_state import PipelineState, PipelineStatus
 
 
 @pytest.fixture

@@ -1,10 +1,12 @@
 """Pipeline state models."""
 
 from __future__ import annotations
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, List
+
 from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 from .artifacts import StageID
 

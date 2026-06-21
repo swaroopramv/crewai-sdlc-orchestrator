@@ -4,12 +4,11 @@ Used by test_plan_reviewer and qa_signoff_agent to request and check approvals.
 """
 
 from __future__ import annotations
+
 import json
 import logging
-from typing import Optional
 
 from crewai.tools import BaseTool
-from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +80,6 @@ class CheckApprovalTool(BaseTool):
     def _run(self, approval_id: str) -> str:
         try:
             status = self._approval_manager.get_status(approval_id)
-            pending = self._approval_manager.pending_for_pipeline("") if hasattr(self._approval_manager, "pending_for_pipeline") else []
             req = self._approval_manager._get(approval_id)
             return json.dumps({
                 "approval_id": approval_id,

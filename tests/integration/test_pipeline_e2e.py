@@ -10,7 +10,6 @@ Ollama, or CrewAI install.
 import json
 
 import pytest
-
 import tasks.execution as execution_tasks
 import tasks.fs as fs_tasks
 import tasks.release as release_tasks

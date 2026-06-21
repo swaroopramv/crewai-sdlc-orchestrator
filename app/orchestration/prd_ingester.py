@@ -7,13 +7,14 @@ in the ArtifactStore so all downstream stages can reference them by ID.
 """
 
 from __future__ import annotations
+
 import json
-import uuid
 import logging
+import uuid
 from pathlib import Path
 from typing import Optional
 
-from models.artifacts import PRD, FeatureRequest, ArtifactMeta, StageID, Ownership
+from models.artifacts import PRD, ArtifactMeta, FeatureRequest, Ownership, StageID
 from storage.artifact_store import ArtifactStore
 
 logger = logging.getLogger(__name__)

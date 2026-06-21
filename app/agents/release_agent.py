@@ -4,8 +4,9 @@ Covers: Support KT (17), Docs (18), Coverage Final (19), SIT (20),
         Nightly Integration (21), Nightly Reporting (22), QA Sign-off (23), Feedback (24).
 """
 
-from crewai import Agent
 from typing import Any
+
+from crewai import Agent
 
 
 def build_support_kt_agent(llm: Any, tools: list) -> Agent:

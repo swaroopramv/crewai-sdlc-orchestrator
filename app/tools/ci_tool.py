@@ -1,8 +1,8 @@
 """CI integration tool for test staging and execution."""
 
+
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
-from typing import Any
 
 
 class CIStagingInput(BaseModel):

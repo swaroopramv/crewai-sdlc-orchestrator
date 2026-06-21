@@ -3,8 +3,9 @@ Automation / Execution loop agents.
 Covers: Stage (10), Execute (11), Triage (12), Bug File (13), Bug Repro (14), Fix (15), FixVerify (16).
 """
 
-from crewai import Agent
 from typing import Any
+
+from crewai import Agent
 
 
 def build_stage_agent(llm: Any, tools: list) -> Agent:

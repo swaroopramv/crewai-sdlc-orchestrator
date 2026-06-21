@@ -1,9 +1,11 @@
 """Pipeline state manager — persists and restores PipelineState via the checkpoint store."""
 
 from __future__ import annotations
+
 from typing import Optional
-from models.pipeline_state import PipelineState, StageStatus
+
 from models.artifacts import StageID
+from models.pipeline_state import PipelineState, StageStatus
 from storage.checkpoint_store import CheckpointStore
 
 

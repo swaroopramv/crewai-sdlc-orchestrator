@@ -4,11 +4,13 @@ Hooks into pipeline and stage lifecycle events to emit telemetry.
 """
 
 from __future__ import annotations
+
 import logging
 from datetime import datetime
-from models.telemetry import TelemetryEvent, EventType
-from models.pipeline_state import PipelineState
+
 from models.artifacts import StageID
+from models.pipeline_state import PipelineState
+from models.telemetry import EventType, TelemetryEvent
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
 """Notification tools for Chat, email, and approval alerts."""
 
-from crewai.tools import BaseTool
 import json
 import logging
+
+from crewai.tools import BaseTool
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +52,8 @@ class ApprovalNotifyTool(BaseTool):
             f"Please review and approve or reject."
         )
         for approver in approvers:
-            logger.info("APPROVAL NOTIFY → %s for %s", approver, approval_id)
-        # Placeholder
+            # Placeholder: in production this sends a rich Chat card / email.
+            logger.info("APPROVAL NOTIFY → %s for %s:\n%s", approver, approval_id, message)
         return json.dumps({"status": "sent", "approval_id": approval_id, "notified": approvers})
 
 

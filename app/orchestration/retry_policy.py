@@ -1,9 +1,10 @@
 """Retry policy for stage execution failures."""
 
 from __future__ import annotations
-import time
+
 import logging
-from typing import Callable, Any, Optional
+import time
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
