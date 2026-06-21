@@ -7,7 +7,9 @@ except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
 from typing import Optional
 
 
-def fs_generation_task(agent, prd_id: str, scoping_dev_id: str, scoping_qa_id: str, context: Optional[list] = None) -> Task:
+def fs_generation_task(
+    agent, prd_id: str, scoping_dev_id: str, scoping_qa_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Generate the Software Functional Specification (FS) from:
@@ -67,7 +69,13 @@ def dev_feature_track_task(agent, prd_id: str, fs_id: str, context: Optional[lis
     )
 
 
-def fs_review_task(agent, fs_id: str, prd_id: str, traceability_id: Optional[str] = None, context: Optional[list] = None) -> Task:
+def fs_review_task(
+    agent,
+    fs_id: str,
+    prd_id: str,
+    traceability_id: Optional[str] = None,
+    context: Optional[list] = None,
+) -> Task:
     return Task(
         description=f"""
         Review the FS (artifact_id: {fs_id}) against the PRD (artifact_id: {prd_id}).

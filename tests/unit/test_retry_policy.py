@@ -27,13 +27,17 @@ class TestRetryPolicy:
                 raise FakeRetryableError("rate limit")
             return "success"
 
-        policy = RetryPolicy(max_retries=3, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",))
+        policy = RetryPolicy(
+            max_retries=3, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",)
+        )
         result = policy.execute(flaky, "stage_test")
         assert result == "success"
         assert calls["count"] == 3
 
     def test_raises_after_max_retries(self):
-        policy = RetryPolicy(max_retries=2, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",))
+        policy = RetryPolicy(
+            max_retries=2, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",)
+        )
         with pytest.raises(FakeRetryableError):
             policy.execute(lambda: (_ for _ in ()).throw(FakeRetryableError("fail")), "stage_test")
 
@@ -44,7 +48,9 @@ class TestRetryPolicy:
             calls["count"] += 1
             raise FakePermanentError("fatal")
 
-        policy = RetryPolicy(max_retries=3, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",))
+        policy = RetryPolicy(
+            max_retries=3, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",)
+        )
         with pytest.raises(FakePermanentError):
             policy.execute(failing, "stage_test")
         assert calls["count"] == 1
@@ -58,7 +64,9 @@ class TestRetryPolicy:
         def on_retry(attempt, exc):
             retries.append(attempt)
 
-        policy = RetryPolicy(max_retries=2, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",))
+        policy = RetryPolicy(
+            max_retries=2, base_delay_seconds=0, retryable_error_types=("FakeRetryableError",)
+        )
         with pytest.raises(FakeRetryableError):
             policy.execute(failing, "stage_test", on_retry=on_retry)
 

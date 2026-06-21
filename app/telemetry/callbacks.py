@@ -25,7 +25,11 @@ class TelemetryCallbacks:
         event = TelemetryEvent(
             pipeline_id=state.pipeline_id,
             event_type=EventType.PIPELINE_STARTED,
-            data={"prd_id": state.prd_id, "feature_id": state.feature_id, "platform": state.platform}
+            data={
+                "prd_id": state.prd_id,
+                "feature_id": state.feature_id,
+                "platform": state.platform,
+            },
         )
         self._emit(event)
 
@@ -33,7 +37,7 @@ class TelemetryCallbacks:
         event = TelemetryEvent(
             pipeline_id=state.pipeline_id,
             event_type=EventType.PIPELINE_COMPLETED,
-            data=state.summary()
+            data=state.summary(),
         )
         self._emit(event)
 
@@ -41,7 +45,7 @@ class TelemetryCallbacks:
         event = TelemetryEvent(
             pipeline_id=state.pipeline_id,
             event_type=EventType.PIPELINE_FAILED,
-            data={**state.summary(), "error": error}
+            data={**state.summary(), "error": error},
         )
         self._emit(event)
 
@@ -52,7 +56,7 @@ class TelemetryCallbacks:
             pipeline_id=pipeline_id,
             stage_id=stage_id,
             event_type=EventType.STAGE_STARTED,
-            data={"stage_id": str(stage_id)}
+            data={"stage_id": str(stage_id)},
         )
         self._emit(event)
 
@@ -60,14 +64,16 @@ class TelemetryCallbacks:
         key = f"{pipeline_id}_{stage_id}"
         duration_ms = None
         if key in self._stage_start_times:
-            duration_ms = (datetime.utcnow() - self._stage_start_times.pop(key)).total_seconds() * 1000
+            duration_ms = (
+                datetime.utcnow() - self._stage_start_times.pop(key)
+            ).total_seconds() * 1000
 
         event = TelemetryEvent(
             pipeline_id=pipeline_id,
             stage_id=stage_id,
             event_type=EventType.STAGE_COMPLETED,
             duration_ms=duration_ms,
-            data={"stage_id": str(stage_id)}
+            data={"stage_id": str(stage_id)},
         )
         self._emit(event)
 
@@ -76,7 +82,7 @@ class TelemetryCallbacks:
             pipeline_id=pipeline_id,
             stage_id=stage_id,
             event_type=EventType.STAGE_RETRIED,
-            data={"attempt": attempt, "error": error}
+            data={"attempt": attempt, "error": error},
         )
         self._emit(event)
 
@@ -85,7 +91,7 @@ class TelemetryCallbacks:
             pipeline_id=pipeline_id,
             stage_id=stage_id,
             event_type=EventType.APPROVAL_REQUESTED,
-            data={"approval_id": approval_id}
+            data={"approval_id": approval_id},
         )
         self._emit(event)
 

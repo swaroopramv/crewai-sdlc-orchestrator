@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 class ChatNotifyTool(BaseTool):
     name: str = "chat_notify"
-    description: str = "Send a Chat message to a room or person with a notification about a pipeline event"
+    description: str = (
+        "Send a Chat message to a room or person with a notification about a pipeline event"
+    )
 
     def _run(self, recipient: str, message: str, room_id: str = "") -> str:
         """
@@ -38,9 +40,13 @@ class EmailNotifyTool(BaseTool):
 
 class ApprovalNotifyTool(BaseTool):
     name: str = "approval_notify"
-    description: str = "Send an approval request notification to designated approvers via Chat and email"
+    description: str = (
+        "Send an approval request notification to designated approvers via Chat and email"
+    )
 
-    def _run(self, approval_id: str, approvers: list[str], stage_id: str, context_summary: str) -> str:
+    def _run(
+        self, approval_id: str, approvers: list[str], stage_id: str, context_summary: str
+    ) -> str:
         """
         Notify approvers of a pending approval request.
         In production: sends rich Chat card with approve/reject buttons.

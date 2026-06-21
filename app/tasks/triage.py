@@ -64,7 +64,9 @@ def bug_file_task(agent, triage_id: str, context: Optional[list] = None) -> Task
     )
 
 
-def bug_repro_task(agent, bug_record_id: str, scripts_id: str, testbed_id: str, context: Optional[list] = None) -> Task:
+def bug_repro_task(
+    agent, bug_record_id: str, scripts_id: str, testbed_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Reproduce the filed bug (artifact_id: {bug_record_id}).
@@ -93,7 +95,9 @@ def bug_repro_task(agent, bug_record_id: str, scripts_id: str, testbed_id: str, 
     )
 
 
-def fix_task(agent, bug_record_id: str, repro_result_id: str, scripts_id: str, context: Optional[list] = None) -> Task:
+def fix_task(
+    agent, bug_record_id: str, repro_result_id: str, scripts_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Apply a fix for the confirmed bug (artifact_id: {bug_record_id}).
@@ -125,7 +129,9 @@ def fix_task(agent, bug_record_id: str, repro_result_id: str, scripts_id: str, c
     )
 
 
-def fix_verify_task(agent, patch_id: str, execution_id: str, context: Optional[list] = None) -> Task:
+def fix_verify_task(
+    agent, patch_id: str, execution_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Validate that the fix (artifact_id: {patch_id}) resolves the issue and causes no regressions.

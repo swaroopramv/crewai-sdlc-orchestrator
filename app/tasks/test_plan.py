@@ -13,10 +13,18 @@ def test_plan_generation_task(
     topology_id: str,
     impl_summary_id: Optional[str] = None,
     testing_notes_id: Optional[str] = None,
-    context: Optional[list] = None
+    context: Optional[list] = None,
 ) -> Task:
-    impl_ctx = f"Implementation Summary (artifact_id: {impl_summary_id})" if impl_summary_id else "No implementation summary available."
-    notes_ctx = f"Testing Notes (artifact_id: {testing_notes_id})" if testing_notes_id else "No testing notes available."
+    impl_ctx = (
+        f"Implementation Summary (artifact_id: {impl_summary_id})"
+        if impl_summary_id
+        else "No implementation summary available."
+    )
+    notes_ctx = (
+        f"Testing Notes (artifact_id: {testing_notes_id})"
+        if testing_notes_id
+        else "No testing notes available."
+    )
 
     return Task(
         description=f"""
@@ -54,7 +62,9 @@ def test_plan_generation_task(
     )
 
 
-def test_plan_review_task(agent, test_plan_id: str, fs_id: str, context: Optional[list] = None) -> Task:
+def test_plan_review_task(
+    agent, test_plan_id: str, fs_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Review and coordinate approval of the test plan (artifact_id: {test_plan_id}).

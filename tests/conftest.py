@@ -1,6 +1,5 @@
 """Shared pytest fixtures for unit and integration tests."""
 
-
 import pytest
 from models.pipeline_state import PipelineState
 from orchestration.approval_manager import ApprovalManager
@@ -13,6 +12,7 @@ from storage.checkpoint_store import CheckpointStore
 # ------------------------------------------------------------------
 # Storage
 # ------------------------------------------------------------------
+
 
 @pytest.fixture
 def artifact_store(tmp_path):
@@ -27,6 +27,7 @@ def checkpoint_store(tmp_path):
 # ------------------------------------------------------------------
 # Orchestration components
 # ------------------------------------------------------------------
+
 
 @pytest.fixture
 def approval_manager():
@@ -52,6 +53,7 @@ def prd_ingester(artifact_store):
 # Pre-built pipeline state
 # ------------------------------------------------------------------
 
+
 @pytest.fixture
 def pipeline_state():
     return PipelineState(
@@ -65,18 +67,30 @@ def pipeline_state():
 @pytest.fixture
 def pipeline_state_with_prd(artifact_store):
     """Pipeline state where PRD and FeatureRequest are already in the store."""
-    artifact_store.store("prd_001", "prd_ingestion", "PRD", {
-        "prd_id": "prd_001",
-        "title": "BGP Graceful Restart",
-        "description": "Support GR per RFC 4724",
-        "requirements": [{"id": "REQ-001", "description": "Must support RFC 4724", "priority": "must"}],
-    })
-    artifact_store.store("feat_001", "prd_ingestion", "FeatureRequest", {
-        "request_id": "feat_001",
-        "title": "BGP GR Support",
-        "description": "Implement BGP Graceful Restart",
-        "priority": "high",
-    })
+    artifact_store.store(
+        "prd_001",
+        "prd_ingestion",
+        "PRD",
+        {
+            "prd_id": "prd_001",
+            "title": "BGP Graceful Restart",
+            "description": "Support GR per RFC 4724",
+            "requirements": [
+                {"id": "REQ-001", "description": "Must support RFC 4724", "priority": "must"}
+            ],
+        },
+    )
+    artifact_store.store(
+        "feat_001",
+        "prd_ingestion",
+        "FeatureRequest",
+        {
+            "request_id": "feat_001",
+            "title": "BGP GR Support",
+            "description": "Implement BGP Graceful Restart",
+            "priority": "high",
+        },
+    )
     return PipelineState(
         pipeline_id="pipe_test_002",
         prd_id="prd_001",
@@ -88,6 +102,7 @@ def pipeline_state_with_prd(artifact_store):
 # ------------------------------------------------------------------
 # Sample artifacts
 # ------------------------------------------------------------------
+
 
 @pytest.fixture
 def sample_prd_data():
@@ -120,8 +135,18 @@ def sample_test_plan():
         "plan_id": "plan_001",
         "fs_id": "fs_001",
         "test_scenarios": [
-            {"id": "TC-001", "name": "Basic GR negotiation", "type": "positive", "fs_req_id": "REQ-001"},
-            {"id": "TC-002", "name": "GR timeout handling", "type": "negative", "fs_req_id": "REQ-002"},
+            {
+                "id": "TC-001",
+                "name": "Basic GR negotiation",
+                "type": "positive",
+                "fs_req_id": "REQ-001",
+            },
+            {
+                "id": "TC-002",
+                "name": "GR timeout handling",
+                "type": "negative",
+                "fs_req_id": "REQ-002",
+            },
         ],
         "expected_results": [
             {"tc_id": "TC-001", "expected": "GR capability negotiated successfully"},
@@ -153,7 +178,11 @@ def sample_triage_report():
         "execution_id": "exec_001",
         "failure_classifications": [
             {"tc_id": "TC-015", "type": "PRODUCT_BUG", "summary": "Null pointer in GR handler"},
-            {"tc_id": "TC-018", "type": "TEST_ISSUE", "summary": "Incorrect timeout value in script"},
+            {
+                "tc_id": "TC-018",
+                "type": "TEST_ISSUE",
+                "summary": "Incorrect timeout value in script",
+            },
         ],
         "root_cause_analysis": ["GR handler does not check for null peer state"],
         "product_bugs": ["TC-015"],
@@ -164,6 +193,7 @@ def sample_triage_report():
 # ------------------------------------------------------------------
 # Sample PRD files
 # ------------------------------------------------------------------
+
 
 @pytest.fixture
 def prd_markdown_file(tmp_path):
@@ -184,6 +214,7 @@ def prd_markdown_file(tmp_path):
 @pytest.fixture
 def prd_json_file(tmp_path, sample_prd_data):
     import json
+
     p = tmp_path / "prd.json"
     p.write_text(json.dumps(sample_prd_data))
     return str(p)

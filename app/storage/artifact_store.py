@@ -34,12 +34,21 @@ class ArtifactStore:
     def _conn(self):
         return sqlite3.connect(self._db_path)
 
-    def store(self, artifact_id: str, stage_id: str, artifact_type: str, data: Any, version: int = 1) -> str:
+    def store(
+        self, artifact_id: str, stage_id: str, artifact_type: str, data: Any, version: int = 1
+    ) -> str:
         payload = data if isinstance(data, str) else json.dumps(data, default=str)
         with self._conn() as conn:
             conn.execute(
                 "INSERT OR REPLACE INTO artifacts VALUES (?,?,?,?,?,?)",
-                (artifact_id, stage_id, artifact_type, payload, datetime.utcnow().isoformat(), version)
+                (
+                    artifact_id,
+                    stage_id,
+                    artifact_type,
+                    payload,
+                    datetime.utcnow().isoformat(),
+                    version,
+                ),
             )
         return artifact_id
 
@@ -59,7 +68,7 @@ class ArtifactStore:
         with self._conn() as conn:
             rows = conn.execute(
                 "SELECT artifact_id, artifact_type, created_at FROM artifacts WHERE stage_id=?",
-                (stage_id,)
+                (stage_id,),
             ).fetchall()
         return [{"artifact_id": r[0], "type": r[1], "created_at": r[2]} for r in rows]
 

@@ -29,8 +29,13 @@ from telemetry.callbacks import TelemetryCallbacks
 from telemetry.metrics import MetricsCollector
 
 TASK_MODULES = [
-    scoping_tasks, fs_tasks, test_plan_tasks, test_scripts_tasks,
-    execution_tasks, triage_tasks, release_tasks,
+    scoping_tasks,
+    fs_tasks,
+    test_plan_tasks,
+    test_scripts_tasks,
+    execution_tasks,
+    triage_tasks,
+    release_tasks,
 ]
 
 
@@ -99,6 +104,7 @@ def _run(runner, platform="CLOUD"):
 # Happy path
 # ----------------------------------------------------------------------
 
+
 def test_full_pipeline_completes(tmp_path, stub_tasks):
     factory = FakeCrewFactory()
     runner, artifacts = _build_runner(tmp_path, factory)
@@ -111,12 +117,27 @@ def test_full_pipeline_completes(tmp_path, stub_tasks):
     # No product bugs => triage loop exits after one pass, so bug stages are skipped.
     completed = {sid for sid, run in state.stages.items() if run.status == StageStatus.COMPLETED}
     expected = {
-        "scoping_dev", "scoping_qa", "fs_gen", "dev_feature_track",
-        "fs_review", "test_plan_gen", "test_plan_review",
-        "test_script_gen", "test_script_review", "coverage_check",
-        "stage", "execute", "triage",
-        "support_kt", "docs_gen", "coverage_final", "sit",
-        "nightly_integration", "nightly_reporting", "qa_signoff", "feedback",
+        "scoping_dev",
+        "scoping_qa",
+        "fs_gen",
+        "dev_feature_track",
+        "fs_review",
+        "test_plan_gen",
+        "test_plan_review",
+        "test_script_gen",
+        "test_script_review",
+        "coverage_check",
+        "stage",
+        "execute",
+        "triage",
+        "support_kt",
+        "docs_gen",
+        "coverage_final",
+        "sit",
+        "nightly_integration",
+        "nightly_reporting",
+        "qa_signoff",
+        "feedback",
     }
     assert expected <= completed
     # Bug stages should NOT have run.
@@ -140,6 +161,7 @@ def test_stage_outputs_are_persisted(tmp_path, stub_tasks):
 # ----------------------------------------------------------------------
 # Human-in-the-loop approval gates
 # ----------------------------------------------------------------------
+
 
 def test_approval_gates_are_invoked(tmp_path, stub_tasks):
     seen = []
@@ -169,9 +191,7 @@ def test_rejected_approval_fails_pipeline(tmp_path, stub_tasks):
     with pytest.raises(RuntimeError, match="not approved"):
         _run(runner)
 
-    state = runner.state_mgr.get(
-        next(iter(runner.state_mgr._cache))
-    )
+    state = runner.state_mgr.get(next(iter(runner.state_mgr._cache)))
     assert state.status == PipelineStatus.FAILED
 
 
@@ -179,12 +199,15 @@ def test_rejected_approval_fails_pipeline(tmp_path, stub_tasks):
 # Triage loop
 # ----------------------------------------------------------------------
 
+
 def test_triage_loop_runs_bug_stages_when_bugs_found(tmp_path, stub_tasks):
     # Triage reports a product bug on the first pass, then a clean pass.
-    triage_outputs = iter([
-        json.dumps({"product_bugs": ["TC-001"]}),
-        json.dumps({"product_bugs": []}),
-    ])
+    triage_outputs = iter(
+        [
+            json.dumps({"product_bugs": ["TC-001"]}),
+            json.dumps({"product_bugs": []}),
+        ]
+    )
 
     factory = FakeCrewFactory(outputs={"triage_crew": lambda: next(triage_outputs)})
     runner, _ = _build_runner(tmp_path, factory)

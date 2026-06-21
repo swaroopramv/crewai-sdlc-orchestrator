@@ -22,7 +22,9 @@ class TestPRDIngesterFromText:
         prd_id, feat_id = ingester.ingest_from_text(
             prd_title="BGP Graceful Restart",
             prd_description="Support BGP GR on CLOUD platforms",
-            requirements=[{"id": "REQ-001", "description": "Must support RFC 4724", "priority": "must"}],
+            requirements=[
+                {"id": "REQ-001", "description": "Must support RFC 4724", "priority": "must"}
+            ],
             feature_title="BGP Graceful Restart Support",
         )
         assert store.get(prd_id) is not None
@@ -40,7 +42,11 @@ class TestPRDIngesterFromText:
 
     def test_requirements_stored(self, ingester, store):
         reqs = [
-            {"id": "REQ-001", "description": "Must reduce failover time to < 1s", "priority": "must"},
+            {
+                "id": "REQ-001",
+                "description": "Must reduce failover time to < 1s",
+                "priority": "must",
+            },
             {"id": "REQ-002", "description": "Should support all VRFs", "priority": "should"},
         ]
         prd_id, _ = ingester.ingest_from_text(

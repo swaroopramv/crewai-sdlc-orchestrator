@@ -7,7 +7,9 @@ except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
 from typing import Optional
 
 
-def support_kt_task(agent, fix_verify_id: str, test_plan_id: str, execution_id: str, context: Optional[list] = None) -> Task:
+def support_kt_task(
+    agent, fix_verify_id: str, test_plan_id: str, execution_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Generate a Support Knowledge Transfer (KT) document.
@@ -33,7 +35,9 @@ def support_kt_task(agent, fix_verify_id: str, test_plan_id: str, execution_id: 
     )
 
 
-def docs_task(agent, fs_id: str, test_plan_id: str, execution_id: str, context: Optional[list] = None) -> Task:
+def docs_task(
+    agent, fs_id: str, test_plan_id: str, execution_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Generate feature documentation and release notes.
@@ -62,7 +66,13 @@ def docs_task(agent, fs_id: str, test_plan_id: str, execution_id: str, context: 
     )
 
 
-def coverage_final_task(agent, execution_id: str, test_plan_id: str, coverage_check_id: str, context: Optional[list] = None) -> Task:
+def coverage_final_task(
+    agent,
+    execution_id: str,
+    test_plan_id: str,
+    coverage_check_id: str,
+    context: Optional[list] = None,
+) -> Task:
     return Task(
         description=f"""
         Produce the final Coverage coverage report after all execution cycles.
@@ -91,7 +101,9 @@ def coverage_final_task(agent, execution_id: str, test_plan_id: str, coverage_ch
     )
 
 
-def sit_task(agent, test_project_id: str, execution_id: str, context: Optional[list] = None) -> Task:
+def sit_task(
+    agent, test_project_id: str, execution_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Run System Integration Tests (SIT) to validate end-to-end behavior.
@@ -113,7 +125,9 @@ def sit_task(agent, test_project_id: str, execution_id: str, context: Optional[l
     )
 
 
-def nightly_integration_task(agent, test_project_id: str, sit_result_id: str, context: Optional[list] = None) -> Task:
+def nightly_integration_task(
+    agent, test_project_id: str, sit_result_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Integrate the validated tests into nightly and regression suites.
@@ -136,7 +150,9 @@ def nightly_integration_task(agent, test_project_id: str, sit_result_id: str, co
     )
 
 
-def nightly_reporting_task(agent, nightly_profile_id: str, execution_id: str, context: Optional[list] = None) -> Task:
+def nightly_reporting_task(
+    agent, nightly_profile_id: str, execution_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Report on nightly/regression run results and trends.
@@ -166,7 +182,7 @@ def qa_signoff_task(
     coverage_final_id: str,
     sit_result_id: str,
     nightly_report_id: str,
-    context: Optional[list] = None
+    context: Optional[list] = None,
 ) -> Task:
     return Task(
         description=f"""

@@ -73,7 +73,8 @@ class ApprovalManager:
 
     def pending_for_pipeline(self, pipeline_id: str) -> list[ApprovalRequest]:
         return [
-            r for r in self._requests.values()
+            r
+            for r in self._requests.values()
             if r.pipeline_id == pipeline_id and r.status == ApprovalStatus.PENDING
         ]
 

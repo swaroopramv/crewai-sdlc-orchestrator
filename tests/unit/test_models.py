@@ -7,7 +7,9 @@ from models.pipeline_state import PipelineState, PipelineStatus, StageStatus
 
 class TestArtifactMeta:
     def test_default_id_generated(self):
-        meta = ArtifactMeta(stage_id=StageID.SCOPING_DEV, ownership=Ownership.DEV, created_by="agent")
+        meta = ArtifactMeta(
+            stage_id=StageID.SCOPING_DEV, ownership=Ownership.DEV, created_by="agent"
+        )
         assert meta.artifact_id is not None
         assert len(meta.artifact_id) > 0
 
@@ -27,7 +29,7 @@ class TestScopingDecision:
             rationale="Feature is feasible within current sprint",
             feature_short_name="bgp_gr",
             technology_classification={"protocol": "BGP", "platform": "CLOUD"},
-            scope_boundaries=["single-VRF only"]
+            scope_boundaries=["single-VRF only"],
         )
         assert decision.decision == "in-scope"
         assert "bgp_gr" == decision.feature_short_name
@@ -36,10 +38,7 @@ class TestScopingDecision:
 class TestPipelineState:
     def _make_state(self) -> PipelineState:
         return PipelineState(
-            pipeline_id="pipe_001",
-            prd_id="prd_001",
-            feature_id="feat_001",
-            platform="CLOUD"
+            pipeline_id="pipe_001", prd_id="prd_001", feature_id="feat_001", platform="CLOUD"
         )
 
     def test_initial_status(self):
@@ -97,7 +96,7 @@ class TestApprovalRequest:
             requester="qa_agent",
             approvers=["qa_lead@example.com", "pm@example.com"],
             minimum_approvals=2,
-            context={"plan_id": "plan_001"}
+            context={"plan_id": "plan_001"},
         )
 
     def test_initial_status_pending(self):

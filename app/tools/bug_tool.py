@@ -9,7 +9,14 @@ class IssueFileTool(BaseTool):
     name: str = "issue_tracker_file_bug"
     description: str = "File a new bug in IssueTracker (generic issue tracking system) and return the IssueTracker ID"
 
-    def _run(self, title: str, description: str, severity: str, priority: str, reproduction_steps: list[str]) -> str:
+    def _run(
+        self,
+        title: str,
+        description: str,
+        severity: str,
+        priority: str,
+        reproduction_steps: list[str],
+    ) -> str:
         """
         File a bug in IssueTracker.
         In production: calls IssueTracker REST API / MCP server.

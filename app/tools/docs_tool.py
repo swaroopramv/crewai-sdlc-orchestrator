@@ -7,7 +7,9 @@ from crewai.tools import BaseTool
 
 class ArtifactReadTool(BaseTool):
     name: str = "read_artifact"
-    description: str = "Read an artifact from the artifact store by its artifact_id and return its content"
+    description: str = (
+        "Read an artifact from the artifact store by its artifact_id and return its content"
+    )
     _artifact_store: object = None
 
     def __init__(self, artifact_store):
@@ -23,7 +25,9 @@ class ArtifactReadTool(BaseTool):
 
 class ArtifactWriteTool(BaseTool):
     name: str = "write_artifact"
-    description: str = "Store an artifact in the artifact store with the given stage_id and artifact_type"
+    description: str = (
+        "Store an artifact in the artifact store with the given stage_id and artifact_type"
+    )
     _artifact_store: object = None
 
     def __init__(self, artifact_store):

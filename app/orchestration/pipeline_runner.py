@@ -175,95 +175,116 @@ class PipelineRunner:
         ctx["feature_id"] = feature_id
 
         ctx["scoping_dev_id"] = self._run_stage(
-            state, StageID.SCOPING_DEV,
+            state,
+            StageID.SCOPING_DEV,
             lambda: self.factory.dev_scoping_crew(
                 scoping_tasks.dev_scoping_task(None, prd_id, feature_id)
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["scoping_qa_id"] = self._run_stage(
-            state, StageID.SCOPING_QA,
+            state,
+            StageID.SCOPING_QA,
             lambda: self.factory.qa_scoping_crew(
                 scoping_tasks.qa_scoping_task(None, ctx["scoping_dev_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["fs_id"] = self._run_stage(
-            state, StageID.FS_GEN,
+            state,
+            StageID.FS_GEN,
             lambda: self.factory.fs_gen_crew(
-                fs_tasks.fs_generation_task(None, prd_id, ctx["scoping_dev_id"], ctx["scoping_qa_id"])
-            ).kickoff()
+                fs_tasks.fs_generation_task(
+                    None, prd_id, ctx["scoping_dev_id"], ctx["scoping_qa_id"]
+                )
+            ).kickoff(),
         )
 
         ctx["impl_id"] = self._run_stage(
-            state, StageID.DEV_FEATURE_TRACK,
+            state,
+            StageID.DEV_FEATURE_TRACK,
             lambda: self.factory.dev_track_crew(
                 fs_tasks.dev_feature_track_task(None, prd_id, ctx["fs_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         return ctx
 
     def _run_phase2(self, state, ctx) -> dict:
         ctx["fs_review_id"] = self._run_stage(
-            state, StageID.FS_REVIEW,
+            state,
+            StageID.FS_REVIEW,
             lambda: self.factory.fs_review_crew(
                 fs_tasks.fs_review_task(None, ctx["fs_id"], ctx["prd_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["test_plan_id"] = self._run_stage(
-            state, StageID.TEST_PLAN_GEN,
+            state,
+            StageID.TEST_PLAN_GEN,
             lambda: self.factory.test_plan_gen_crew(
                 tp_tasks.test_plan_generation_task(
-                    None, ctx["fs_id"], ctx.get("topology_id", "default_topology"),
-                    impl_summary_id=ctx.get("impl_id"), testing_notes_id=ctx.get("impl_id")
+                    None,
+                    ctx["fs_id"],
+                    ctx.get("topology_id", "default_topology"),
+                    impl_summary_id=ctx.get("impl_id"),
+                    testing_notes_id=ctx.get("impl_id"),
                 )
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["approved_plan_id"] = self._run_stage(
-            state, StageID.TEST_PLAN_REVIEW,
+            state,
+            StageID.TEST_PLAN_REVIEW,
             lambda: self.factory.test_plan_review_crew(
                 tp_tasks.test_plan_review_task(None, ctx["test_plan_id"], ctx["fs_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         return ctx
 
     def _run_phase3(self, state, ctx) -> dict:
         ctx["scripts_id"] = self._run_stage(
-            state, StageID.TEST_SCRIPT_GEN,
+            state,
+            StageID.TEST_SCRIPT_GEN,
             lambda: self.factory.test_script_gen_crew(
                 ts_tasks.test_script_generation_task(
-                    None, ctx["approved_plan_id"], ctx.get("topology_id", "default_topology"),
-                    impl_summary_id=ctx.get("impl_id"), automation_notes_id=ctx.get("impl_id")
+                    None,
+                    ctx["approved_plan_id"],
+                    ctx.get("topology_id", "default_topology"),
+                    impl_summary_id=ctx.get("impl_id"),
+                    automation_notes_id=ctx.get("impl_id"),
                 )
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["script_review_id"] = self._run_stage(
-            state, StageID.TEST_SCRIPT_REVIEW,
+            state,
+            StageID.TEST_SCRIPT_REVIEW,
             lambda: self.factory.test_script_review_crew(
                 ts_tasks.test_script_review_task(None, ctx["scripts_id"], ctx["approved_plan_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["coverage_check_id"] = self._run_stage(
-            state, StageID.COVERAGE_CHECK,
+            state,
+            StageID.COVERAGE_CHECK,
             lambda: self.factory.coverage_check_crew(
                 ts_tasks.coverage_check_task(None, ctx["scripts_id"], ctx["approved_plan_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         return ctx
 
     def _run_phase4(self, state, ctx) -> dict:
         ctx["stage_result_id"] = self._run_stage(
-            state, StageID.STAGE,
+            state,
+            StageID.STAGE,
             lambda: self.factory.stage_crew(
-                exec_tasks.stage_task(None, ctx["scripts_id"], ctx.get("testbed_id", "default_testbed"))
-            ).kickoff()
+                exec_tasks.stage_task(
+                    None, ctx["scripts_id"], ctx.get("testbed_id", "default_testbed")
+                )
+            ).kickoff(),
         )
 
         loop_count = 0
@@ -271,17 +292,21 @@ class PipelineRunner:
 
         while not all_pass and loop_count < self.max_triage_loops:
             ctx["execution_id"] = self._run_stage(
-                state, StageID.EXECUTE,
+                state,
+                StageID.EXECUTE,
                 lambda: self.factory.execute_crew(
-                    exec_tasks.execute_task(None, ctx["stage_result_id"], ctx.get("testbed_id", "default_testbed"))
-                ).kickoff()
+                    exec_tasks.execute_task(
+                        None, ctx["stage_result_id"], ctx.get("testbed_id", "default_testbed")
+                    )
+                ).kickoff(),
             )
 
             ctx["triage_id"] = self._run_stage(
-                state, StageID.TRIAGE,
+                state,
+                StageID.TRIAGE,
                 lambda: self.factory.triage_crew(
                     triage_tasks.triage_task(None, ctx["execution_id"], ctx["scripts_id"])
-                ).kickoff()
+                ).kickoff(),
             )
 
             triage_result = self.artifacts.get(ctx["triage_id"])
@@ -289,35 +314,46 @@ class PipelineRunner:
 
             if not has_product_bugs:
                 all_pass = True
-                logger.info("Triage loop %d complete — no product bugs, exiting loop", loop_count + 1)
+                logger.info(
+                    "Triage loop %d complete — no product bugs, exiting loop", loop_count + 1
+                )
                 break
 
             ctx["bug_ids"] = self._run_stage(
-                state, StageID.BUG_FILE,
+                state,
+                StageID.BUG_FILE,
                 lambda: self.factory.bug_file_crew(
                     triage_tasks.bug_file_task(None, ctx["triage_id"])
-                ).kickoff()
+                ).kickoff(),
             )
 
             ctx["repro_id"] = self._run_stage(
-                state, StageID.BUG_REPRO,
+                state,
+                StageID.BUG_REPRO,
                 lambda: self.factory.bug_repro_crew(
-                    triage_tasks.bug_repro_task(None, ctx["bug_ids"], ctx["scripts_id"], ctx.get("testbed_id", "default_testbed"))
-                ).kickoff()
+                    triage_tasks.bug_repro_task(
+                        None,
+                        ctx["bug_ids"],
+                        ctx["scripts_id"],
+                        ctx.get("testbed_id", "default_testbed"),
+                    )
+                ).kickoff(),
             )
 
             ctx["patch_id"] = self._run_stage(
-                state, StageID.FIX,
+                state,
+                StageID.FIX,
                 lambda: self.factory.fix_crew(
                     triage_tasks.fix_task(None, ctx["bug_ids"], ctx["repro_id"], ctx["scripts_id"])
-                ).kickoff()
+                ).kickoff(),
             )
 
             ctx["fix_verify_id"] = self._run_stage(
-                state, StageID.FIX_VERIFY,
+                state,
+                StageID.FIX_VERIFY,
                 lambda: self.factory.fix_verify_crew(
                     triage_tasks.fix_verify_task(None, ctx["patch_id"], ctx["execution_id"])
-                ).kickoff()
+                ).kickoff(),
             )
 
             loop_count += 1
@@ -328,62 +364,82 @@ class PipelineRunner:
 
     def _run_phase5(self, state, ctx, pipeline_id) -> dict:
         ctx["kt_id"] = self._run_stage(
-            state, StageID.SUPPORT_KT,
+            state,
+            StageID.SUPPORT_KT,
             lambda: self.factory.support_kt_crew(
-                release_tasks.support_kt_task(None, ctx.get("fix_verify_id", ""), ctx["approved_plan_id"], ctx["execution_id"])
-            ).kickoff()
+                release_tasks.support_kt_task(
+                    None, ctx.get("fix_verify_id", ""), ctx["approved_plan_id"], ctx["execution_id"]
+                )
+            ).kickoff(),
         )
 
         ctx["docs_id"] = self._run_stage(
-            state, StageID.DOCS_GEN,
+            state,
+            StageID.DOCS_GEN,
             lambda: self.factory.docs_crew(
-                release_tasks.docs_task(None, ctx["fs_id"], ctx["approved_plan_id"], ctx["execution_id"])
-            ).kickoff()
+                release_tasks.docs_task(
+                    None, ctx["fs_id"], ctx["approved_plan_id"], ctx["execution_id"]
+                )
+            ).kickoff(),
         )
 
         ctx["coverage_final_id"] = self._run_stage(
-            state, StageID.COVERAGE_FINAL,
+            state,
+            StageID.COVERAGE_FINAL,
             lambda: self.factory.coverage_final_crew(
-                release_tasks.coverage_final_task(None, ctx["execution_id"], ctx["approved_plan_id"], ctx["coverage_check_id"])
-            ).kickoff()
+                release_tasks.coverage_final_task(
+                    None, ctx["execution_id"], ctx["approved_plan_id"], ctx["coverage_check_id"]
+                )
+            ).kickoff(),
         )
 
         ctx["sit_id"] = self._run_stage(
-            state, StageID.SIT,
+            state,
+            StageID.SIT,
             lambda: self.factory.sit_crew(
                 release_tasks.sit_task(None, ctx["scripts_id"], ctx["execution_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["nightly_profile_id"] = self._run_stage(
-            state, StageID.NIGHTLY_INTEGRATION,
+            state,
+            StageID.NIGHTLY_INTEGRATION,
             lambda: self.factory.nightly_integration_crew(
                 release_tasks.nightly_integration_task(None, ctx["scripts_id"], ctx["sit_id"])
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["nightly_report_id"] = self._run_stage(
-            state, StageID.NIGHTLY_REPORTING,
+            state,
+            StageID.NIGHTLY_REPORTING,
             lambda: self.factory.nightly_reporting_crew(
-                release_tasks.nightly_reporting_task(None, ctx["nightly_profile_id"], ctx["execution_id"])
-            ).kickoff()
+                release_tasks.nightly_reporting_task(
+                    None, ctx["nightly_profile_id"], ctx["execution_id"]
+                )
+            ).kickoff(),
         )
 
         ctx["signoff_id"] = self._run_stage(
-            state, StageID.QA_SIGNOFF,
+            state,
+            StageID.QA_SIGNOFF,
             lambda: self.factory.qa_signoff_crew(
                 release_tasks.qa_signoff_task(
-                    None, ctx["kt_id"], ctx["docs_id"], ctx["coverage_final_id"],
-                    ctx["sit_id"], ctx["nightly_report_id"]
+                    None,
+                    ctx["kt_id"],
+                    ctx["docs_id"],
+                    ctx["coverage_final_id"],
+                    ctx["sit_id"],
+                    ctx["nightly_report_id"],
                 )
-            ).kickoff()
+            ).kickoff(),
         )
 
         ctx["feedback_id"] = self._run_stage(
-            state, StageID.FEEDBACK,
+            state,
+            StageID.FEEDBACK,
             lambda: self.factory.feedback_crew(
                 release_tasks.feedback_task(None, pipeline_id)
-            ).kickoff()
+            ).kickoff(),
         )
 
         return ctx

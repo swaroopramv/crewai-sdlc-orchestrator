@@ -115,10 +115,7 @@ class PipelineState(BaseModel):
         self.updated_at = datetime.utcnow()
 
     def get_last_completed_stage(self) -> Optional[StageID]:
-        completed = [
-            s for s in self.stages.values()
-            if s.status == StageStatus.COMPLETED
-        ]
+        completed = [s for s in self.stages.values() if s.status == StageStatus.COMPLETED]
         if not completed:
             return None
         return sorted(completed, key=lambda x: x.completed_at or datetime.min)[-1].stage_id
@@ -129,7 +126,9 @@ class PipelineState(BaseModel):
             "status": self.status,
             "current_stage": self.current_stage_id,
             "total_stages": len(self.stages),
-            "completed_stages": sum(1 for s in self.stages.values() if s.status == StageStatus.COMPLETED),
+            "completed_stages": sum(
+                1 for s in self.stages.values() if s.status == StageStatus.COMPLETED
+            ),
             "failed_stages": sum(1 for s in self.stages.values() if s.status == StageStatus.FAILED),
             "triage_loop_count": self.triage_loop_count,
         }

@@ -1,6 +1,5 @@
 """Unit tests for artifact store and checkpoint store."""
 
-
 import pytest
 from models.pipeline_state import PipelineState
 from storage.artifact_store import ArtifactStore
@@ -20,10 +19,7 @@ def checkpoint_store(tmp_path):
 @pytest.fixture
 def sample_state():
     return PipelineState(
-        pipeline_id="pipe_test_001",
-        prd_id="prd_001",
-        feature_id="feat_001",
-        platform="CLOUD"
+        pipeline_id="pipe_test_001", prd_id="prd_001", feature_id="feat_001", platform="CLOUD"
     )
 
 

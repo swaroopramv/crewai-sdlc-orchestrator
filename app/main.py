@@ -67,7 +67,9 @@ def build_llm(provider: str) -> object:
     )
 
 
-def build_tools_registry(artifact_store: ArtifactStore, approval_manager: ApprovalManager) -> dict[str, list]:
+def build_tools_registry(
+    artifact_store: ArtifactStore, approval_manager: ApprovalManager
+) -> dict[str, list]:
     docs = get_docs_tools(artifact_store)
     approvals = get_approval_tools(approval_manager)
     return {
@@ -115,23 +117,38 @@ def build_runner(platform: str, llm_provider: str = "ollama") -> PipelineRunner:
 
 def main():
     parser = argparse.ArgumentParser(description="CrewAI SDLC Lifecycle Orchestrator")
-    parser.add_argument("--prd-file", metavar="PATH",
-                        help="Path to PRD document (.md / .txt / .json) — ingested at Stage 0")
-    parser.add_argument("--prd", metavar="PRD_ID",
-                        help="Existing PRD artifact ID (skips file ingestion if already in store)")
-    parser.add_argument("--prd-title", metavar="TITLE",
-                        help="PRD title when supplying inline text instead of a file")
-    parser.add_argument("--feature", metavar="FEATURE_ID",
-                        help="Existing FeatureRequest artifact ID")
-    parser.add_argument("--feature-title", metavar="TITLE",
-                        help="Feature title when supplying inline text instead of a file")
+    parser.add_argument(
+        "--prd-file",
+        metavar="PATH",
+        help="Path to PRD document (.md / .txt / .json) — ingested at Stage 0",
+    )
+    parser.add_argument(
+        "--prd",
+        metavar="PRD_ID",
+        help="Existing PRD artifact ID (skips file ingestion if already in store)",
+    )
+    parser.add_argument(
+        "--prd-title",
+        metavar="TITLE",
+        help="PRD title when supplying inline text instead of a file",
+    )
+    parser.add_argument(
+        "--feature", metavar="FEATURE_ID", help="Existing FeatureRequest artifact ID"
+    )
+    parser.add_argument(
+        "--feature-title",
+        metavar="TITLE",
+        help="Feature title when supplying inline text instead of a file",
+    )
     parser.add_argument("--platform", choices=["CORE", "CLOUD", "EDGE"], default="CLOUD")
     parser.add_argument("--llm", choices=["ollama", "openai", "anthropic"], default="ollama")
     parser.add_argument("--resume", metavar="PIPELINE_ID", help="Resume a paused pipeline by ID")
     args = parser.parse_args()
 
     if not args.resume and not args.prd_file and not args.prd_title:
-        parser.error("Provide --prd-file <path>, --prd-title <title>, or --prd <existing-id> to identify the PRD")
+        parser.error(
+            "Provide --prd-file <path>, --prd-title <title>, or --prd <existing-id> to identify the PRD"
+        )
 
     runner = build_runner(args.platform, args.llm)
 

@@ -1,6 +1,5 @@
 """CI integration tool for test staging and execution."""
 
-
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 
@@ -8,7 +7,9 @@ from pydantic import BaseModel, Field
 class CIStagingInput(BaseModel):
     project_path: str = Field(..., description="Path to the test project directory")
     testbed_id: str = Field(..., description="Testbed identifier")
-    test_suite: str = Field(default="all", description="Test suite to stage (all or specific TC ID)")
+    test_suite: str = Field(
+        default="all", description="Test suite to stage (all or specific TC ID)"
+    )
 
 
 class CIExecutionInput(BaseModel):
@@ -19,7 +20,9 @@ class CIExecutionInput(BaseModel):
 
 class CIStageTool(BaseTool):
     name: str = "ci_stage"
-    description: str = "Stage a test project to the CI execution environment and get a commit reference"
+    description: str = (
+        "Stage a test project to the CI execution environment and get a commit reference"
+    )
 
     def _run(self, project_path: str, testbed_id: str, test_suite: str = "all") -> str:
         """
@@ -60,6 +63,7 @@ class CILogTool(BaseTool):
         # Placeholder
         logs = {tc: f"FAILED {tc}: AssertionError — expected X got Y" for tc in tc_ids}
         import json
+
         return json.dumps(logs)
 
 

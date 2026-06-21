@@ -7,7 +7,9 @@ except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
 from typing import Optional
 
 
-def dev_scoping_task(agent, prd_id: str, feature_request_id: str, context: Optional[list] = None) -> Task:
+def dev_scoping_task(
+    agent, prd_id: str, feature_request_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Analyze the PRD (artifact_id: {prd_id}) and feature request (artifact_id: {feature_request_id}).
@@ -36,7 +38,9 @@ def dev_scoping_task(agent, prd_id: str, feature_request_id: str, context: Optio
     )
 
 
-def qa_scoping_task(agent, scoping_decision_id: str, prd_id: Optional[str] = None, context: Optional[list] = None) -> Task:
+def qa_scoping_task(
+    agent, scoping_decision_id: str, prd_id: Optional[str] = None, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Enrich the DEV scoping decision (artifact_id: {scoping_decision_id}) with test perspective.

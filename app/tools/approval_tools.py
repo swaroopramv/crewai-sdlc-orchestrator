@@ -38,6 +38,7 @@ class RequestApprovalTool(BaseTool):
         timeout_hours: int = 24,
     ) -> str:
         from models.artifacts import StageID
+
         approver_list = [a.strip() for a in approvers.split(",") if a.strip()]
         artifact_list = [a.strip() for a in artifact_ids.split(",") if a.strip()]
 
@@ -57,12 +58,14 @@ class RequestApprovalTool(BaseTool):
             timeout_hours=timeout_hours,
         )
         logger.info("Approval requested: %s for stage %s", req.approval_id, stage_id)
-        return json.dumps({
-            "approval_id": req.approval_id,
-            "status": req.status,
-            "approvers": approver_list,
-            "expires_at": req.expires_at.isoformat() if req.expires_at else None,
-        })
+        return json.dumps(
+            {
+                "approval_id": req.approval_id,
+                "status": req.status,
+                "approvers": approver_list,
+                "expires_at": req.expires_at.isoformat() if req.expires_at else None,
+            }
+        )
 
 
 class CheckApprovalTool(BaseTool):
@@ -81,13 +84,15 @@ class CheckApprovalTool(BaseTool):
         try:
             status = self._approval_manager.get_status(approval_id)
             req = self._approval_manager._get(approval_id)
-            return json.dumps({
-                "approval_id": approval_id,
-                "status": status,
-                "pending_approvers": req.pending_approvers(),
-                "decisions_received": len(req.decisions),
-                "minimum_required": req.minimum_approvals,
-            })
+            return json.dumps(
+                {
+                    "approval_id": approval_id,
+                    "status": status,
+                    "pending_approvers": req.pending_approvers(),
+                    "decisions_received": len(req.decisions),
+                    "minimum_required": req.minimum_approvals,
+                }
+            )
         except KeyError:
             return json.dumps({"error": f"Approval {approval_id} not found"})
 
@@ -113,11 +118,13 @@ class GrantApprovalTool(BaseTool):
                 comments=comments or None,
             )
             logger.info("Approval %s granted by %s", approval_id, decided_by)
-            return json.dumps({
-                "approval_id": approval_id,
-                "status": req.status,
-                "decided_by": decided_by,
-            })
+            return json.dumps(
+                {
+                    "approval_id": approval_id,
+                    "status": req.status,
+                    "decided_by": decided_by,
+                }
+            )
         except PermissionError as e:
             return json.dumps({"error": str(e)})
         except TimeoutError as e:
@@ -147,12 +154,14 @@ class RejectApprovalTool(BaseTool):
                 comments=comments,
             )
             logger.info("Approval %s rejected by %s: %s", approval_id, decided_by, comments)
-            return json.dumps({
-                "approval_id": approval_id,
-                "status": req.status,
-                "decided_by": decided_by,
-                "comments": comments,
-            })
+            return json.dumps(
+                {
+                    "approval_id": approval_id,
+                    "status": req.status,
+                    "decided_by": decided_by,
+                    "comments": comments,
+                }
+            )
         except PermissionError as e:
             return json.dumps({"error": str(e)})
         except KeyError:

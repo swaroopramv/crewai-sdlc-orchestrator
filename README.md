@@ -1,5 +1,10 @@
 # 🤖 CrewAI SDLC Orchestrator
 
+[![CI](https://github.com/swaroopramv/crewai-sdlc-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/swaroopramv/crewai-sdlc-orchestrator/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/swaroopramv/crewai-sdlc-orchestrator/branch/main/graph/badge.svg)](https://codecov.io/gh/swaroopramv/crewai-sdlc-orchestrator)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **An end-to-end, multi-agent AI system that automates the software delivery
 lifecycle — from a product requirements doc (PRD) all the way to QA sign-off.**
 

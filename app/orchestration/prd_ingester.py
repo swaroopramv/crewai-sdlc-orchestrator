@@ -63,7 +63,9 @@ class PRDIngester:
         else:
             prd = self._parse_text_prd(content, stem=path.stem, prd_id=prd_id)
 
-        return self._store_both(prd, feature_title, feature_description, feature_priority, feature_id)
+        return self._store_both(
+            prd, feature_title, feature_description, feature_priority, feature_id
+        )
 
     def ingest_from_text(
         self,
@@ -89,7 +91,9 @@ class PRDIngester:
             requirements=requirements,
             meta=self._meta(),
         )
-        return self._store_both(prd, feature_title, feature_description, feature_priority, feature_id)
+        return self._store_both(
+            prd, feature_title, feature_description, feature_priority, feature_id
+        )
 
     def load_existing(self, prd_id: str, feature_id: str) -> tuple[str, str]:
         """
@@ -103,7 +107,9 @@ class PRDIngester:
             raise KeyError(f"PRD artifact '{prd_id}' not found in artifact store")
         if self._store.get(feature_id) is None:
             raise KeyError(f"FeatureRequest artifact '{feature_id}' not found in artifact store")
-        logger.info("PRD ingester: existing artifacts verified — prd=%s feature=%s", prd_id, feature_id)
+        logger.info(
+            "PRD ingester: existing artifacts verified — prd=%s feature=%s", prd_id, feature_id
+        )
         return prd_id, feature_id
 
     # ------------------------------------------------------------------
@@ -127,14 +133,14 @@ class PRDIngester:
         req_id = 1
         for line in lines:
             stripped = line.strip()
-            if stripped.startswith(("- ", "* ")) or (len(stripped) > 2 and stripped[0].isdigit() and stripped[1] in ".):"):
+            if stripped.startswith(("- ", "* ")) or (
+                len(stripped) > 2 and stripped[0].isdigit() and stripped[1] in ".):"
+            ):
                 text = stripped.lstrip("-*0123456789.)").strip()
                 if len(text) > 10:
-                    requirements.append({
-                        "id": f"REQ-{req_id:03d}",
-                        "description": text,
-                        "priority": "must"
-                    })
+                    requirements.append(
+                        {"id": f"REQ-{req_id:03d}", "description": text, "priority": "must"}
+                    )
                     req_id += 1
 
         return PRD(
@@ -162,11 +168,15 @@ class PRDIngester:
         )
 
         self._store.store(prd.prd_id, self.INGEST_STAGE.value, "PRD", prd.model_dump())
-        self._store.store(feature.request_id, self.INGEST_STAGE.value, "FeatureRequest", feature.model_dump())
+        self._store.store(
+            feature.request_id, self.INGEST_STAGE.value, "FeatureRequest", feature.model_dump()
+        )
 
         logger.info(
             "PRD ingested → prd_id=%s  feature_id=%s  requirements=%d",
-            prd.prd_id, feature.request_id, len(prd.requirements)
+            prd.prd_id,
+            feature.request_id,
+            len(prd.requirements),
         )
         return prd.prd_id, feature.request_id
 

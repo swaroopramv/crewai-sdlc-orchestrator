@@ -34,7 +34,7 @@ class RetryPolicy:
         return any(t in type(error).__name__ for t in self.retryable)
 
     def delay_for(self, attempt: int) -> float:
-        return self.base_delay * (self.backoff ** attempt)
+        return self.base_delay * (self.backoff**attempt)
 
     def execute(
         self,

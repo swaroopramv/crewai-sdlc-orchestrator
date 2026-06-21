@@ -14,7 +14,9 @@ class StateManager:
         self._store = checkpoint_store
         self._cache: dict[str, PipelineState] = {}
 
-    def init_state(self, pipeline_id: str, prd_id: str, feature_id: str, platform: str) -> PipelineState:
+    def init_state(
+        self, pipeline_id: str, prd_id: str, feature_id: str, platform: str
+    ) -> PipelineState:
         state = PipelineState(
             pipeline_id=pipeline_id,
             prd_id=prd_id,
@@ -24,7 +26,9 @@ class StateManager:
         self._cache[pipeline_id] = state
         return state
 
-    def load_or_init(self, pipeline_id: str, prd_id: str, feature_id: str, platform: str) -> PipelineState:
+    def load_or_init(
+        self, pipeline_id: str, prd_id: str, feature_id: str, platform: str
+    ) -> PipelineState:
         saved = self._store.load_latest(pipeline_id)
         if saved:
             self._cache[pipeline_id] = saved
@@ -42,7 +46,9 @@ class StateManager:
         state.mark_started(stage_id)
         self.save(state, f"Started {stage_id}")
 
-    def stage_complete(self, state: PipelineState, stage_id: StageID, output_ids: list[str]) -> None:
+    def stage_complete(
+        self, state: PipelineState, stage_id: StageID, output_ids: list[str]
+    ) -> None:
         state.mark_completed(stage_id, output_ids)
         self.save(state, f"Completed {stage_id}")
 

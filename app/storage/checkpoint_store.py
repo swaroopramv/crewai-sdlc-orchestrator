@@ -41,7 +41,7 @@ class CheckpointStore:
                     state.model_dump_json(),
                     datetime.utcnow().isoformat(),
                     description,
-                )
+                ),
             )
         return checkpoint_id
 
@@ -49,7 +49,7 @@ class CheckpointStore:
         with self._conn() as conn:
             row = conn.execute(
                 "SELECT state_json FROM checkpoints WHERE pipeline_id=? ORDER BY created_at DESC LIMIT 1",
-                (pipeline_id,)
+                (pipeline_id,),
             ).fetchone()
         if not row:
             return None
@@ -59,7 +59,7 @@ class CheckpointStore:
         with self._conn() as conn:
             rows = conn.execute(
                 "SELECT checkpoint_id, created_at, description FROM checkpoints WHERE pipeline_id=? ORDER BY created_at DESC",
-                (pipeline_id,)
+                (pipeline_id,),
             ).fetchall()
         return [{"id": r[0], "created_at": r[1], "description": r[2]} for r in rows]
 

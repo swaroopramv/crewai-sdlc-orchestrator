@@ -13,10 +13,12 @@ def test_script_generation_task(
     topology_id: str,
     impl_summary_id: Optional[str] = None,
     automation_notes_id: Optional[str] = None,
-    context: Optional[list] = None
+    context: Optional[list] = None,
 ) -> Task:
     impl_ctx = f"Implementation Summary (artifact_id: {impl_summary_id})" if impl_summary_id else ""
-    auto_ctx = f"Automation Notes (artifact_id: {automation_notes_id})" if automation_notes_id else ""
+    auto_ctx = (
+        f"Automation Notes (artifact_id: {automation_notes_id})" if automation_notes_id else ""
+    )
 
     return Task(
         description=f"""
@@ -50,7 +52,9 @@ def test_script_generation_task(
     )
 
 
-def test_script_review_task(agent, scripts_id: str, test_plan_id: str, context: Optional[list] = None) -> Task:
+def test_script_review_task(
+    agent, scripts_id: str, test_plan_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Review the generated test scripts (artifact_id: {scripts_id}) against the test plan (artifact_id: {test_plan_id}).
@@ -83,7 +87,9 @@ def test_script_review_task(agent, scripts_id: str, test_plan_id: str, context: 
     )
 
 
-def coverage_check_task(agent, scripts_id: str, test_plan_id: str, context: Optional[list] = None) -> Task:
+def coverage_check_task(
+    agent, scripts_id: str, test_plan_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Measure test coverage of scripts (artifact_id: {scripts_id}) against the test plan (artifact_id: {test_plan_id}).

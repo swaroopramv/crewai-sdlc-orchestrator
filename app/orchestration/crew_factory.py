@@ -121,7 +121,9 @@ class CrewFactory:
     # Phase 3
     # ------------------------------------------------------------------
     def test_script_gen_crew(self, task) -> Crew:
-        agent = build_test_script_generator_agent(self.llm, self._tools_for("test_script_generator"))
+        agent = build_test_script_generator_agent(
+            self.llm, self._tools_for("test_script_generator")
+        )
         task.agent = agent
         return Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=True)
 
@@ -197,7 +199,9 @@ class CrewFactory:
         return Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=True)
 
     def nightly_integration_crew(self, task) -> Crew:
-        agent = build_nightly_integration_agent(self.llm, self._tools_for("nightly_integration_agent"))
+        agent = build_nightly_integration_agent(
+            self.llm, self._tools_for("nightly_integration_agent")
+        )
         task.agent = agent
         return Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=True)
 

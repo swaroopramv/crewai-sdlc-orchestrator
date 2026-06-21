@@ -18,7 +18,14 @@ class MetricsCollector:
         events = [e for e in self._raw if e.pipeline_id == pipeline_id]
 
         start = next((e for e in events if e.event_type == EventType.PIPELINE_STARTED), None)
-        end = next((e for e in events if e.event_type in (EventType.PIPELINE_COMPLETED, EventType.PIPELINE_FAILED)), None)
+        end = next(
+            (
+                e
+                for e in events
+                if e.event_type in (EventType.PIPELINE_COMPLETED, EventType.PIPELINE_FAILED)
+            ),
+            None,
+        )
 
         total_duration = 0.0
         if start and end:
@@ -54,8 +61,12 @@ class MetricsCollector:
             )
 
         triage_loop = next(
-            (e.data.get("triage_loop_count", 0) for e in events if e.event_type == EventType.PIPELINE_COMPLETED),
-            0
+            (
+                e.data.get("triage_loop_count", 0)
+                for e in events
+                if e.event_type == EventType.PIPELINE_COMPLETED
+            ),
+            0,
         )
 
         return PipelineMetrics(

@@ -7,7 +7,9 @@ except ImportError:  # allows importing tasks without CrewAI (fake-crew tests)
 from typing import Optional
 
 
-def stage_task(agent, test_project_id: str, testbed_id: str, context: Optional[list] = None) -> Task:
+def stage_task(
+    agent, test_project_id: str, testbed_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Stage the test project (artifact_id: {test_project_id}) to the execution environment.
@@ -34,7 +36,9 @@ def stage_task(agent, test_project_id: str, testbed_id: str, context: Optional[l
     )
 
 
-def execute_task(agent, stage_result_id: str, testbed_id: str, context: Optional[list] = None) -> Task:
+def execute_task(
+    agent, stage_result_id: str, testbed_id: str, context: Optional[list] = None
+) -> Task:
     return Task(
         description=f"""
         Execute the staged test suite using CI.
